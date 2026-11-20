@@ -1,21 +1,17 @@
-# 이순신 한자학습 XR (3D 수정판)
+# 이순신 한자학습 XR — 3D 판옥선 12척
 
-5막 한문 체험: ① 今臣戰船 尙有十二 ② 出死力 拒戰則猶可爲也 ③ 必死則生 必生則死 ④ 一夫當逕 足懼千夫 ⑤ 鳴梁海戰
+GitHub Pages용 `index.html`입니다.
 
-## 수정 사항
-- Three.js 애드온의 `three` 모듈 참조 오류를 **import map**으로 수정했습니다. 기존 버전에서 3D 화면이 완전히 비어 있을 수 있던 주요 원인입니다.
-- 판옥선: `https://imm-content.github.io/admiral-yi-history-xr/Sketchfab_panokseon.glb` (1개 로드 후 12척 복제)
-- 이순신 장군: `https://imm-content.github.io/admiral-yi-history-xr/admiral-yi-sunsin.glb` (제3막)
-- 바다 질감: `https://raw.githubusercontent.com/imm-content/admiral-yi-battle-xr/main/uldolmok-sea-texture.png`
-- GLB 중심점 및 크기를 조정하고, 로딩 실패 시 안내를 표시합니다.
+## 개선 사항
+- 12척을 4열 × 3행으로 분산 배치하고 카메라를 높은 위치에서 함대 전체를 바라보도록 조정
+- GLB 선체의 바닥이 수면 위에 오도록 정렬해 바다에 가려지지 않도록 수정
+- 단일 바다 메시의 정점을 시간에 따라 움직여 파도를 표현
+- 4막에서는 파도 진폭·속도를 높이고 거품 흐름 효과 추가
+- 기존 `uldolmok-sea-texture.png`는 바다 색상 질감으로만 활용
+- 이순신 장군 GLB 및 5막 한문 학습 유지
 
-## 설치
-`index.html`과 `README.md`를 GitHub 저장소 루트에 업로드하고 GitHub Pages를 켭니다. 외부 GLB/PNG 파일은 해당 주소에서 직접 읽어오므로 **원본 저장소가 공개되어 있어야 합니다.**
+## 사용법
+압축 해제 후 `index.html`, `README.md`를 저장소 최상위에 업로드하고 GitHub Pages를 활성화하세요. 외부 GLB·PNG 및 Three.js CDN에 접속할 수 있어야 합니다.
 
-## 확인 방법
-1. 웹페이지 새로고침(Ctrl+F5) 후 모델 로드 완료 메시지를 기다립니다.
-2. 제1막 `체험 시작`을 눌러 판옥선 12척을 확인합니다.
-3. 제3막으로 이동하여 이순신 장군 모델을 확인합니다.
-4. 문제가 지속되면 F12 → Console의 첫 번째 빨간 오류 메시지를 확인합니다.
-
-참고: 원격 GLB 및 바다 이미지의 실제 네트워크 응답은 제작 환경에서 확인할 수 없었습니다. 따라서 원본 파일의 접근 가능 여부는 배포 후 검증이 필요합니다.
+## 주의
+브라우저에서 원격 모델의 실제 방향과 크기까지 검증한 것은 아니며, 일부 모델은 회전 보정이 추가로 필요할 수 있습니다. 파도는 교육용 시각 효과이며 실제 울돌목 조류의 물리 시뮬레이션은 아닙니다.
