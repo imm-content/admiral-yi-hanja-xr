@@ -14,7 +14,7 @@ const scenes=[
 ['제3막 · 필사즉생','必死則生 必生則死','필사즉생 필생즉사','죽기를 각오하면 살고, 살려고만 하면 죽는다.','必(반드시 필) · 死(죽을 사) · 則(곧 즉) · 生(살 생)','「生」의 뜻은?',['싸우다','살다','바다'],1],
 ['제4막 · 울돌목의 좁은 해협','一夫當逕 足懼千夫','일부당경 족구천부','한 사람이 좁은 길목을 지키면 천 사람도 두렵게 할 수 있다.','一(한 일) · 夫(사내 부) · 當(당할 당) · 逕(좁은 길 경) · 足(족할 족) · 懼(두려워할 구) · 千(일천 천)','「千夫」의 뜻은?',['백 사람','천 사람','열 사람'],1],
 ['제5막 · 승리의 명량','鳴梁海戰','명량해전','명량에서 벌어진 해전','鳴(울 명) · 梁(들보 량) · 海(바다 해) · 戰(싸울 전)','「海戰」의 뜻은?',['바다의 전투','산의 전투','배 건조'],0]];
-const $=id=>document.getElementById(id);let current=0,token=0,model=null,admiralModel=null,shipCount=0;const ships=[];let actor=null;
+const $=id=>document.getElementById(id);let current=0,token=0,model=null,admiralModel=null,shipCount=0;const ships=[];let actor=null;let flagship=null;
 const renderer=new THREE.WebGLRenderer({canvas:$('three'),antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;
 const scene=new THREE.Scene();scene.background=new THREE.Color('#789eb0');scene.fog=new THREE.Fog('#789eb0',85,240);
 const camera=new THREE.PerspectiveCamera(46,1,.1,500);camera.position.set(0,37,76);
@@ -26,7 +26,18 @@ const waterMat=new THREE.MeshStandardMaterial({color:0x287c8b,roughness:.32,meta
 const water=new THREE.Mesh(waterGeo,waterMat);water.position.y=-1.15;scene.add(water);
 const waterBase=waterGeo.attributes.position.array.slice();
 // 원본 울돌목 질감은 작은 파도 색감에만 활용합니다. 바다 배경 사진을 별도 평면으로 중첩하지 않습니다.
-new THREE.TextureLoader().load(SEA,t=>{t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(5,5);waterMat.map=t;waterMat.color.set(0x94bdc3);waterMat.needsUpdate=true;},undefined,e=>console.warn('바다 질감 미사용: 절차적 파도는 계속 작동합니다.',e));
+// 사진 텍스처는 섬/수평선까지 포함하여 반복 무늬를 만들므로 수면에는 적용하지 않습니다.
+// 단일 수면은 절차적 색상과 파도 높낮이로 표현합니다.
+const seaColors=new Float32Array(waterGeo.attributes.position.count*3);
+const seaColor=new THREE.Color();
+for(let i=0;i<waterGeo.attributes.position.count;i++){
+ const x=waterBase[i*3],z=waterBase[i*3+2];
+ const v=.5+.5*Math.sin(x*.14+Math.cos(z*.11))*Math.cos(z*.17);
+ seaColor.setHSL(.53+v*.015,.55,.19+v*.11);
+ seaColors[i*3]=seaColor.r;seaColors[i*3+1]=seaColor.g;seaColors[i*3+2]=seaColor.b;
+}
+waterGeo.setAttribute('color',new THREE.BufferAttribute(seaColors,3));
+waterMat.color.set(0xffffff);waterMat.vertexColors=true;waterMat.roughness=.42;waterMat.needsUpdate=true;
 const foamMat=new THREE.MeshBasicMaterial({color:0xd5f7f3,transparent:true,opacity:.52,depthWrite:false,side:THREE.DoubleSide});
 const foamLines=[];
 for(let i=0;i<24;i++){
@@ -34,7 +45,25 @@ for(let i=0;i<24;i++){
  const g=new THREE.BufferGeometry().setFromPoints(points);const m=new THREE.Line(g,new THREE.LineBasicMaterial({color:0xc8f7f3,transparent:true,opacity:.15+(i%4)*.055}));scene.add(m);foamLines.push(m);
 }
 const terrain=new THREE.Group();scene.add(terrain);
-function shore(side){const shape=new THREE.Shape();const s=side;[[s*18,-100],[s*150,-100],[s*150,100],[s*18,100],[s*30,55],[s*19,20],[s*26,-12],[s*18,-50]].forEach(([x,y],i)=>i?shape.lineTo(x,y):shape.moveTo(x,y));shape.closePath();const g=new THREE.ExtrudeGeometry(shape,{depth:8,bevelEnabled:true,bevelThickness:1,bevelSize:1,bevelSegments:1});g.rotateX(-Math.PI/2);const mesh=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:0x4b6049,roughness:1}));mesh.position.y=-1.1;terrain.add(mesh)}shore(-1);shore(1);terrain.visible=false;
+function shore(side){
+ // 해협 양편에 해안선이 굴곡진 입체 섬을 만든다. 수면 위로 솟는 경사 지형.
+ const vertices=[],indices=[];const segments=55,depth=12;
+ for(let j=0;j<=depth;j++)for(let i=0;i<=segments;i++){
+   const z=-120+i*240/segments;
+   const narrowing=13+3*Math.sin(z*.045)+2*Math.cos(z*.095);
+   const x=side*(narrowing+j*4.8);
+   const y=-1.2+Math.pow(j/depth,.85)*27+2.1*Math.sin(z*.063+j*.43)*j/depth;
+   vertices.push(x,y,z);
+ }
+ for(let j=0;j<depth;j++)for(let i=0;i<segments;i++){
+   const k=j*(segments+1)+i;indices.push(k,k+segments+1,k+1,k+1,k+segments+1,k+segments+2);
+ }
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();
+ const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:0x52674b,roughness:1,side:THREE.DoubleSide}));terrain.add(m);
+ // 작은 수목 덩어리로 단색 녹색 벽처럼 보이지 않게 처리
+ const rockMat=new THREE.MeshStandardMaterial({color:0x596459,roughness:1});
+ for(let i=0;i<25;i++){const z=-110+i*9.1;const x=side*(22+3*Math.sin(z*.045));const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(3.5+(i%4),0),rockMat);rock.position.set(x,6+(i%3)*2,z);rock.scale.set(1,.8,1.3);terrain.add(rock)}
+}shore(-1);shore(1);terrain.visible=false;
 function fallback(){const g=new THREE.Group();const hull=new THREE.Mesh(new THREE.BoxGeometry(2.6,.75,6.5),new THREE.MeshStandardMaterial({color:0x704626}));g.add(hull);const deck=new THREE.Mesh(new THREE.BoxGeometry(3.5,.65,3.7),new THREE.MeshStandardMaterial({color:0x9d7040}));deck.position.y=.85;g.add(deck);const mast=new THREE.Mesh(new THREE.CylinderGeometry(.09,.12,5),new THREE.MeshStandardMaterial({color:0x4c3020}));mast.position.y=3;g.add(mast);const sail=new THREE.Mesh(new THREE.PlaneGeometry(3,3),new THREE.MeshStandardMaterial({color:0xe7dcc0,side:THREE.DoubleSide}));sail.position.y=3.2;sail.rotation.y=.18;g.add(sail);return g}
 // 원본 GLB를 그룹 내부에서 중심 정렬하고 일정한 크기로 맞춥니다.
 function normalizeGLB(source, desiredLength){
@@ -61,24 +90,34 @@ loader.load(ADMIRAL,gltf=>{
   catch(e){console.error('장군 GLB 처리 오류:',e)}
 },undefined,err=>{console.error('이순신 장군 GLB:',err)});
 function showAdmiral(){
-  if(actor){scene.remove(actor);actor=null}
-  if(current===2&&admiralModel){actor=admiralModel.clone(true);actor.position.set(0,6,-17);scene.add(actor)}
+ if(actor){actor.parent?.remove(actor);actor=null}
+ if(current!==2)return;
+ // 장군은 공중에 띄우지 않고 기함의 갑판 위에 둔다.
+ const boatAnchor=new THREE.Group();boatAnchor.position.set(0,-.45,0);
+ const boat=(model||fallback()).clone(true);boatAnchor.add(boat);scene.add(boatAnchor);
+ flagship=boatAnchor;ships.push(boatAnchor);
+ if(admiralModel){
+   actor=admiralModel.clone(true);
+   // 장군은 선박과 함께 움직이고, 선박 진행 방향을 바라보도록 회전.
+   actor.scale.setScalar(.26);actor.position.set(0,1.5,0);actor.rotation.y=Math.PI;
+   boatAnchor.add(actor);
+ }
 }
 // 4열 × 3행, 총 12척: 중앙에서 서로 겹치지 않게 배치
-const positions=Array.from({length:12},(_,i)=>{const row=Math.floor(i/4),col=i%4;return [(col-1.5)*12, (1-row)*17]});
-function clearShips(){ships.forEach(s=>scene.remove(s));ships.length=0;shipCount=0;$('counter').textContent='판옥선 0 / 12척'}
+const positions=Array.from({length:12},(_,i)=>{const row=Math.floor(i/4),col=i%4;return [(col-1.5)*9, (row-1)*12]});
+function clearShips(){ships.forEach(s=>scene.remove(s));ships.length=0;flagship=null;actor=null;shipCount=0;$('counter').textContent='판옥선 0 / 12척'}
 function addShip(i){const anchor=new THREE.Group();const boat=(model||fallback()).clone(true);anchor.add(boat);anchor.position.set(positions[i][0],-.45,positions[i][1]);anchor.userData.phase=i*.65;scene.add(anchor);ships.push(anchor);shipCount++;$('counter').textContent=`판옥선 ${shipCount} / 12척`}
-function render(){token++;clearShips();terrain.visible=current===3;showAdmiral();const s=scenes[current];$('sceneTitle').textContent=s[0];$('hanja').textContent=s[1];$('reading').textContent=s[2];$('meaning').textContent=s[3];$('explain').textContent=s[4];$('question').textContent=s[5];$('subtitle').textContent='▶ 체험 시작을 누르세요.';$('result').textContent='';$('choices').replaceChildren();s[6].forEach((v,i)=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>$('result').textContent=i===s[7]?'정답입니다!':'다시 생각해 보세요.';$('choices').append(b)});$('nav').replaceChildren();scenes.forEach((v,i)=>{const b=document.createElement('button');b.textContent=`${i+1}막`;if(i===current)b.classList.add('active');b.onclick=()=>{current=i;render()};$('nav').append(b)});camera.position.set(0,current===3?100:95,current===3?113:106);controls.target.set(0,0,0);controls.update()}
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));async function play(){const t=++token;clearShips();if(!model&&!shipLoadError){$('subtitle').textContent='판옥선 GLB를 불러오는 중입니다. 잠시 후 다시 눌러 주세요.';return;}const s=scenes[current];$('subtitle').textContent=s[3];const delay=current===0?430:current===3?520:180;for(let i=0;i<12;i++){if(t!==token)return;addShip(i);if(i===0&&current===0){$('subtitle').textContent='첫 번째 판옥선이 나타났습니다. 이제 열두 척이 모입니다.';await sleep(1100)}await sleep(delay)}if(t!==token)return;$('subtitle').textContent=current===3?'울돌목의 좁은 해협과 거센 물살을 이용한 방어를 살펴보세요.':current===0?'판옥선 12척! 함대 전체를 확인하세요.':s[3];if(current===1||current===3){$('viewer').classList.remove('shake');void $('viewer').offsetWidth;$('viewer').classList.add('shake');navigator.vibrate?.([90,60,90])}}
+function render(){token++;clearShips();terrain.visible=current===3;showAdmiral();$('counter').style.display=current===0?'block':'none';const s=scenes[current];$('sceneTitle').textContent=s[0];$('hanja').textContent=s[1];$('reading').textContent=s[2];$('meaning').textContent=s[3];$('explain').textContent=s[4];$('question').textContent=s[5];$('subtitle').textContent='▶ 체험 시작을 누르세요.';$('result').textContent='';$('choices').replaceChildren();s[6].forEach((v,i)=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>$('result').textContent=i===s[7]?'정답입니다!':'다시 생각해 보세요.';$('choices').append(b)});$('nav').replaceChildren();scenes.forEach((v,i)=>{const b=document.createElement('button');b.textContent=`${i+1}막`;if(i===current)b.classList.add('active');b.onclick=()=>{current=i;render()};$('nav').append(b)});camera.position.set(0,current===3?33:current===2?12:42,current===3?60:current===2?27:61);controls.target.set(0,current===2?2:0,0);controls.update()}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));async function play(){const t=++token;clearShips();if(current===2)showAdmiral();if(!model&&!shipLoadError){$('subtitle').textContent='판옥선 GLB를 불러오는 중입니다. 잠시 후 다시 눌러 주세요.';return;}const s=scenes[current];$('subtitle').textContent=s[3];const delay=current===0?430:current===3?520:180;for(let i=0;i<(current===2?0:12);i++){if(t!==token)return;addShip(i);if(i===0&&current===0){$('subtitle').textContent='첫 번째 판옥선이 나타났습니다. 이제 열두 척이 모입니다.';await sleep(1100)}await sleep(delay)}if(t!==token)return;$('subtitle').textContent=current===3?'울돌목의 좁은 해협과 거센 물살을 이용한 방어를 살펴보세요.':current===0?'판옥선 12척! 함대 전체를 확인하세요.':s[3];if(current===1||current===3){$('viewer').classList.remove('shake');void $('viewer').offsetWidth;$('viewer').classList.add('shake');navigator.vibrate?.([90,60,90])}}
 function speak(){if(!('speechSynthesis'in window))return alert('음성 읽기를 지원하지 않는 브라우저입니다.');speechSynthesis.cancel();const s=scenes[current];const u=new SpeechSynthesisUtterance(s[2]+'. '+s[3]);u.lang='ko-KR';u.rate=.85;speechSynthesis.speak(u)}
 $('play').onclick=play;$('speak').onclick=speak;$('reset').onclick=render;$('prev').onclick=()=>{current=(current+4)%5;render()};$('next').onclick=()=>{current=(current+1)%5;render()};
 const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const t=clock.getElapsedTime();
  const arr=waterGeo.attributes.position.array;
  for(let k=0;k<arr.length;k+=3){const x=waterBase[k],z=waterBase[k+2];
-   const currentStrength=current===3?1.75:1.0;
+   const currentStrength=current===3?2.4:1.1;
    arr[k+1]=currentStrength*(.35*Math.sin(x*.21+z*.12+t*2.7)+.24*Math.sin(z*.4-x*.14+t*4.2)+.12*Math.cos(x*.75+t*5.5));
  }
  waterGeo.attributes.position.needsUpdate=true;waterGeo.computeVertexNormals();
  foamLines.forEach((m,i)=>{m.position.z=(t*(current===3?5:2.5)+i*3)%15-7.5;m.visible=current===3||i%2===0;});
- ships.forEach(a=>{a.position.y=Math.sin(t*1.8+a.userData.phase)*.14;a.rotation.z=Math.sin(t*1.2+a.userData.phase)*.025});if(waterMat.map){waterMat.map.offset.x=t*(current===3?.018:.007);waterMat.map.offset.y=t*(current===3?.035:.012)}controls.update();const r=$('viewer').getBoundingClientRect();const w=Math.max(1,Math.round(r.width)),h=Math.max(1,Math.round(r.height));if(renderer.domElement.width!==Math.round(w*renderer.getPixelRatio())||renderer.domElement.height!==Math.round(h*renderer.getPixelRatio())){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}renderer.render(scene,camera)}render();frame();
+ ships.forEach(a=>{a.position.y=Math.sin(t*1.8+a.userData.phase)*.14;a.rotation.z=Math.sin(t*1.2+a.userData.phase)*.025});controls.update();const r=$('viewer').getBoundingClientRect();const w=Math.max(1,Math.round(r.width)),h=Math.max(1,Math.round(r.height));if(renderer.domElement.width!==Math.round(w*renderer.getPixelRatio())||renderer.domElement.height!==Math.round(h*renderer.getPixelRatio())){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}renderer.render(scene,camera)}render();frame();
 </script></body></html>
