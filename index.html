@@ -2,7 +2,7 @@
 #enemyStart,#fireStart,#enemyDirection,#historyToggle{display:none!important}#hanjaCaption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:5;text-align:center;pointer-events:none;width:min(92%,780px);padding:12px 20px;background:rgba(7,25,43,.78);border:1px solid rgba(255,255,255,.26);border-radius:12px;color:#fff;opacity:0;transition:opacity .5s ease;text-shadow:0 2px 6px #000}#hanjaCaption.visible{opacity:1}#hanjaCaption .hanja{font-size:clamp(22px,3vw,42px);font-weight:800;letter-spacing:.13em;line-height:1.3}#hanjaCaption .hangul{font-size:clamp(12px,1.2vw,17px);margin-top:5px;color:#e5f1ff}#fleetCount{position:absolute;top:12px;right:12px;z-index:5;background:rgba(7,25,43,.78);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;display:none}</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"}}</script></head><body><header><h2>제1막 · 희망의 열두 척</h2><small>今臣戰船 尙有十二 · 지금 신에게는 아직 열두 척의 전선이 있습니다</small></header><div id="view"><div id="badge">3D 항해 미리보기 / 지원 기기에서는 카메라 AR</div><div id="reticle"></div><div id="fleetCount">조선 수군 1 / 12척</div><div id="hanjaCaption"><div class="hanja">今臣戰船 尙有十二</div><div class="hangul">금신전선 상유십이<br>지금 신에게는 아직 열두 척의 전선이 있습니다.</div></div></div><div id="status">3D 모델을 불러오는 중입니다…</div><div id="historyCard" role="status" aria-live="polite"><button id="historyClose" aria-label="해설 닫기">×</button><strong id="historyTitle"></strong><p id="historyText"></p><div class="foot">※ 역사적 배경에 기초한 축약 연출이며 실제 함선별 교전 순서를 재현하지 않습니다.</div></div><div id="panel"><button id="openChrome" style="display:none">🌐 Chrome에서 열기</button><button id="preview" disabled>▶ 제1막 체험하기</button><button id="ar" disabled>📷 카메라 AR 시작</button><button id="place" style="display:none">이 위치에 바다 배치</button><button id="again" disabled>↻ 다시 보기</button><button id="enemyStart" disabled>⚔ 일본군 함선 등장</button><button id="fireStart" disabled>💥 판옥선 포격 시작</button><button id="historyToggle">📜 역사 해설</button><button id="voiceToggle">🔊 내레이션 켜짐</button><button id="soundToggle">💥 대포 소리 켜짐</button><button id="enemyDirection">↻ 적선 방향 180°</button><button id="turn">↻ 배 45° 회전</button><button id="zoomIn">＋ 확대</button><button id="zoomOut">－ 축소</button></div><div class="note">제1막에서는 판옥선 1척에 11척이 합류하는 장면과 한문 음성을 체험합니다. 카메라 AR 시작 후 녹색 원을 기다리지 말고 바다 배치 버튼을 누르세요. 표면이 인식되면 해당 위치에, 인식 전이면 카메라 전방에 배치됩니다. 카메라 AR: Android Chrome의 WebXR AR 지원 기기에서 HTTPS로 실행하세요. 바닥을 천천히 비춰 표면을 찾고 '이 위치에 바다 배치'를 누릅니다. 미지원 기기에서는 3D 미리보기로 체험할 수 있습니다. 일본군 함선은 japanese_warship.glb를 한 번 불러와 3척으로 복제합니다. 역사적 정확성은 별도 검토가 필요합니다. 포격 버튼을 누르면 포연·포탄·물보라·적선 3척의 순차 침몰을 체험합니다. 다시 연출하려면 일본군 함선 등장 버튼을 누르세요.</div><script type="module">
 import * as THREE from 'three';import {OrbitControls} from 'three/addons/controls/OrbitControls.js';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 const base='https://imm-content.github.io/admiral-yi-history-xr/';const status=document.querySelector('#status'),view=document.querySelector('#view'),preview=document.querySelector('#preview'),ar=document.querySelector('#ar'),place=document.querySelector('#place'),again=document.querySelector('#again'),badge=document.querySelector('#badge');
-const scene=new THREE.Scene();scene.background=new THREE.Color(0xc2d6e0);const camera=new THREE.PerspectiveCamera(50,1,.01,100);camera.position.set(0,2.8,6.5);const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.xr.enabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;view.prepend(renderer.domElement);const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,.1,0);orbit.enableDamping=true;orbit.update();scene.add(new THREE.HemisphereLight(0xffffff,0x507187,2.5));const sun=new THREE.DirectionalLight(0xfff6df,2.3);sun.position.set(2,7,4);scene.add(sun);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xc2d6e0);const camera=new THREE.PerspectiveCamera(50,1,.01,100);camera.position.set(0,5.0,8.5);const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.xr.enabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;view.prepend(renderer.domElement);const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,0,0);orbit.enableDamping=true;orbit.update();scene.add(new THREE.HemisphereLight(0xffffff,0x507187,2.5));const sun=new THREE.DirectionalLight(0xfff6df,2.3);sun.position.set(2,7,4);scene.add(sun);
 const world=new THREE.Group();scene.add(world);world.visible=false;const seaGeo=new THREE.PlaneGeometry(8,8,220,220);seaGeo.rotateX(-Math.PI/2);const seaTexture=new THREE.TextureLoader().load('https://imm-content.github.io/admiral-yi-battle-xr/uldolmok-sea-texture.png',()=>{status.textContent=status.textContent.replace('바다 이미지 로딩 중…','바다 이미지 적용 완료');},undefined,()=>{console.warn('울돌목 바다 이미지를 불러오지 못했습니다.');});
 seaTexture.colorSpace=THREE.SRGBColorSpace;
 seaTexture.wrapS=THREE.ClampToEdgeWrapping;seaTexture.wrapT=THREE.ClampToEdgeWrapping;
@@ -491,12 +491,12 @@ const boatRoot=new THREE.Group();world.add(boatRoot);
 const reinforcementShips=[];
 // 4열 × 3행. 좌표는 8×8 수면 안에서 서로 겹치지 않도록 배치.
 const fleetPositions=[
- [-1.65,-1.65],[-.55,-1.65],[.55,-1.65],[1.65,-1.65],
- [-1.65,-.15],[-.55,-.15],[.55,-.15],[1.65,-.15],
- [-1.65,1.35],[-.55,1.35],[.55,1.35],[1.65,1.35]
+ [-1.65,-2.0],[-.55,-2.0],[.55,-2.0],[1.65,-2.0],
+ [-1.65,-.65],[-.55,-.65],[.55,-.65],[1.65,-.65],
+ [-1.65,.70],[-.55,.70],[.55,.70],[1.65,.70]
 ];
-const SHIP_SCALE=1;
-const SHIP_LIFT=.11;
+const SHIP_SCALE=.36;
+const SHIP_LIFT=0;
 const fleetCount=document.querySelector('#fleetCount'),hanjaCaption=document.querySelector('#hanjaCaption');
 let fleetStart=0,fleetJoining=false,fleetNarrated=false;
 function resetReinforcements(){
@@ -526,58 +526,52 @@ function setStatus(s){status.textContent=s}const loader=new GLTFLoader();functio
 // 각 배의 실제 바운딩박스를 자기 그룹의 원점(0,0,0)에 맞춰 배치합니다.
 // 이전 코드에서는 정규화된 ship의 부모와 복제본의 부모가 달라 좌표가 어긋났습니다.
 const fleetRoots=[boatRoot];
-Promise.all([load(base+'Sketchfab_panokseon.glb'),load(base+'admiral-yi-sunsin.glb')]).then(([source,f])=>{
-  // 복제 이전, 부모 변환이 전혀 없는 모델을 기준으로 크기와 중심을 측정합니다.
-  const template=new THREE.Group();
-  const model=source.clone(true);
-  template.add(model);
-  template.updateMatrixWorld(true);
-  let bounds=new THREE.Box3().setFromObject(template);
-  const dimensions=bounds.getSize(new THREE.Vector3());
-  const longest=Math.max(dimensions.x,dimensions.y,dimensions.z);
-  if(!Number.isFinite(longest)||longest<.000001)throw new Error('판옥선 GLB 크기를 읽을 수 없습니다.');
-  // 한 척 최대 길이 약 0.85m: 4열 x 3행을 바다(8m x 8m)에 배치하기 위한 크기
-  template.scale.setScalar(.85/longest);
-  template.updateMatrixWorld(true);
-  bounds=new THREE.Box3().setFromObject(template);
-  const center=bounds.getCenter(new THREE.Vector3());
-  // 정규화된 배를 수면 기준으로 정렬. 원본 GLB 내부의 큰 오프셋까지 제거합니다.
-  model.position.x-=center.x/template.scale.x;
-  model.position.z-=center.z/template.scale.z;
-  model.position.y-=bounds.min.y/template.scale.y;
-  template.updateMatrixWorld(true);
-  bounds=new THREE.Box3().setFromObject(template);
-  console.log('판옥선 정규화 후 크기:',bounds.getSize(new THREE.Vector3()));
-  // 원본 1척도 복제본과 완전히 동일한 구조를 사용합니다.
-  ship=template.clone(true);
+// 원본 admiral-yi-battle-xr의 검증된 판옥선 정규화 계산을 그대로 사용합니다.
+// GLB 내부 좌표는 수정하지 않고, 완성된 한 척을 독립적인 world 그룹에 복제합니다.
+load(base+'Sketchfab_panokseon.glb').then(source=>{
+  ship=source;
   boatRoot.add(ship);
+   // GLB 자체의 회전·위치·스케일을 보존하고 실제 변환 후 경계로 중심을 보정한다.
+   ship.updateMatrixWorld(true);
+   let bounds=new THREE.Box3().setFromObject(ship);
+   const size=bounds.getSize(new THREE.Vector3());
+   const maxDim=Math.max(size.x,size.y,size.z);
+   if(!Number.isFinite(maxDim)||maxDim<0.00001)throw new Error('GLB 크기를 측정할 수 없습니다.');
+   ship.scale.multiplyScalar(1.45/maxDim);
+   ship.updateMatrixWorld(true);
+   bounds=new THREE.Box3().setFromObject(ship);
+   const actualCenter=bounds.getCenter(new THREE.Vector3());
+   ship.position.x-=actualCenter.x;
+   ship.position.z-=actualCenter.z;
+   ship.position.y-=bounds.min.y;
+   ship.updateMatrixWorld(true);
+   bounds=new THREE.Box3().setFromObject(ship);
+   const normalizedSize=bounds.getSize(new THREE.Vector3());
+   if(Math.max(normalizedSize.x,normalizedSize.y,normalizedSize.z)>1.6)
+     throw new Error('GLB 크기 정규화 실패: '+normalizedSize.toArray().join(','));
+  // 한 척을 0.36배로 축소하여 8x8 바다에 열두 척이 들어가도록 합니다.
+  const fleetShipScale=.36;
+  const waterY=-.045;
+  const xCoords=[-1.65,-.55,.55,1.65];
+  const zCoords=[-2.0,-.65,.70];
   for(let i=1;i<12;i++){
     const root=new THREE.Group();
     root.name='Panokseon_'+(i+1);
-    root.add(template.clone(true));
-    root.position.set(fleetPositions[i][0],SHIP_LIFT,fleetPositions[i][1]);
+    root.add(ship.clone(true));
+    root.scale.setScalar(fleetShipScale);
+    root.position.set(xCoords[i%4],waterY,zCoords[Math.floor(i/4)]);
     root.visible=false;
     world.add(root);
     reinforcementShips.push(root);
     fleetRoots.push(root);
   }
-  // 장군 모델은 원본 1척에만 연결합니다.
-  const fb=new THREE.Box3().setFromObject(f);
-  const fs=fb.getSize(new THREE.Vector3()),fc=fb.getCenter(new THREE.Vector3());
-  f.position.set(-fc.x,-fb.min.y,-fc.z);
-  f.scale.setScalar(1/Math.max(fs.y,.001));
-  admiral=new THREE.Group();admiral.add(f);boatRoot.add(admiral);
-  admiral.position.set(0,.14,0);
-  admiral.scale.setScalar(.10);
-  admiral.rotation.y=Math.PI;
-  boatBaseY=0;
+  boatBaseY=waterY;
   ready=true;preview.disabled=false;again.disabled=false;
   document.querySelector('#enemyStart').disabled=!enemyModelReady;
   world.visible=true;reset();
-  // 디버깅: 12척의 월드 위치가 모두 달라야 합니다.
-  console.table(fleetRoots.map((r,i)=>({ship:i+1,x:r.position.x,z:r.position.z})));
-  setStatus('판옥선 GLB 12척 생성 완료. 제1막 체험하기를 누르세요.');
-}).catch(e=>{console.error(e);setStatus('모델 로딩 실패: '+e.message)});
+  console.table(fleetRoots.map((r,i)=>({ship:i+1,x:r.position.x,y:r.position.y,z:r.position.z})));
+  setStatus('판옥선 GLB 준비 완료. 제1막 체험하기를 누르세요.');
+}).catch(e=>{console.error(e);setStatus('판옥선 모델 로딩 실패: '+e.message)});
 
 function speakActOne(){
  if(!voiceEnabled||!ttsSupported)return;
@@ -595,11 +589,11 @@ function speakActOne(){
 function reset(){
  resetReinforcements();wakeStrength=0;previousWakeZ=null;previousWakeTime=null;wake.visible=false;
  resetEnemies();active=false;userYaw=0;userScale=1;
- boatRoot.position.set(0,SHIP_LIFT,-1.65);
+ boatRoot.position.set(0,boatBaseY,-.75);
  boatRoot.scale.setScalar(SHIP_SCALE);boatRoot.rotation.set(0,SAIL_HEADING,0);
 }
 function begin(){
- if(!ready)return;world.visible=true;stopNarration();reset();boatRoot.position.set(fleetPositions[0][0],SHIP_LIFT,fleetPositions[0][1]);joinFleet();if(!arSession){camera.position.set(0,2.8,6.5);orbit.target.set(0,.1,0);orbit.update();}
+ if(!ready)return;world.visible=true;stopNarration();reset();boatRoot.position.set(0,boatBaseY,-.75);joinFleet();if(!arSession){camera.position.set(0,5.0,8.5);orbit.target.set(0,0,0);orbit.update();}
  setStatus('판옥선이 한 척씩 나타납니다. 12척이 모이면 한자 독음과 뜻을 읽습니다.');
  badge.textContent='제1막 · 판옥선 12척 집결';
 }
@@ -626,9 +620,9 @@ let touchX=null;view.addEventListener('pointerdown',e=>{if(arSession&&placed)tou
 renderer.setAnimationLoop((t,frame)=>{const elapsed=t/1000;
  if(seaMat.userData.waveShader)seaMat.userData.waveShader.uniforms.uWaveTime.value=elapsed;
  // 제1막 선단은 정지 상태로 유지합니다. 항적도 표시하지 않습니다.
- boatRoot.scale.setScalar(SHIP_SCALE*userScale);
+ boatRoot.scale.setScalar(SHIP_SCALE);
  boatRoot.rotation.y=SAIL_HEADING+userYaw;
  boatRoot.rotation.x=0;boatRoot.rotation.z=0;
- boatRoot.position.y=SHIP_LIFT;
+ boatRoot.position.y=boatBaseY;
  if(arSession&&frame&&!placed&&hitSource){const results=frame.getHitTestResults(hitSource);if(results.length){const pose=results[0].getPose(refSpace);if(pose){hitMatrix.fromArray(pose.transform.matrix);marker.position.setFromMatrixPosition(hitMatrix);marker.quaternion.setFromRotationMatrix(hitMatrix);marker.visible=true;place.dataset.found='1';place.disabled=false;badge.textContent='표면 인식 완료 · 바다 배치 버튼을 누르세요'}}else{marker.visible=false;place.dataset.found='';place.disabled=false}}animateReinforcements(elapsed);animateEnemies(elapsed);animateBattleEffects(elapsed);if(!arSession)orbit.update();renderer.render(scene,camera)});
 </script></body></html>
