@@ -69,44 +69,51 @@ const fleet=new THREE.Group();world.add(fleet);
 const vessels=[];let actor=null,leader=null,playing=false,leaderStart=0;
 const loader=new GLTFLoader();
 const tmpBox=new THREE.Box3(), tmpSize=new THREE.Vector3(), tmpCenter=new THREE.Vector3();
+// 원본 admiral-yi-battle-xr의 성공한 정규화 방식: 원본 GLB 최대축 1.45 기준.
+// 복제본을 원본과 동일하게 정규화한 후, 각 함선의 목표 길이만큼 추가 축소한다.
 function normalized(source,targetLength,person=false){
- // 모델을 복제한 뒤 실제 최종 렌더링 경계상자로 크기를 정한다.
- const outer=new THREE.Group();
- const model=source.clone(true);outer.add(model);
- outer.updateMatrixWorld(true);
- let bounds=new THREE.Box3().setFromObject(outer,true);
- let size=bounds.getSize(new THREE.Vector3());
- const measure=person?size.y:Math.max(size.x,size.z);
- if(!Number.isFinite(measure)||measure<1e-7)throw Error('GLB 크기를 계산할 수 없습니다');
- // model에만 크기 변환을 적용하고, outer는 복제 후 위치 배치에 사용한다.
- model.scale.multiplyScalar(targetLength/measure);
- outer.updateMatrixWorld(true);
- bounds.setFromObject(outer,true);
+ const holder=new THREE.Group();
+ const model=source.clone(true);
+ holder.add(model);
+ holder.updateMatrixWorld(true);
+ const initial=new THREE.Box3().setFromObject(model,true);
+ const initialSize=initial.getSize(new THREE.Vector3());
+ const initialCenter=initial.getCenter(new THREE.Vector3());
+ const originalMax=Math.max(initialSize.x,initialSize.y,initialSize.z);
+ if(!Number.isFinite(originalMax)||originalMax<1e-7)throw Error('GLB 경계 크기 오류');
+ // 성공한 원본 코드와 동일한 1.45 기준으로 1차 축소.
+ const k=1.45/originalMax;
+ model.scale.multiplyScalar(k);
+ model.position.sub(initialCenter.multiplyScalar(k));
+ holder.updateMatrixWorld(true);
+ // 모델의 실제 변환 이후 크기를 재측정하고 두 번째로 목표 크기를 적용.
+ let bounds=new THREE.Box3().setFromObject(holder,true);
+ let dimensions=bounds.getSize(new THREE.Vector3());
+ const extent=person?dimensions.y:Math.max(dimensions.x,dimensions.z);
+ if(!Number.isFinite(extent)||extent<1e-7)throw Error('정규화 후 모델 크기 오류');
+ holder.scale.setScalar(targetLength/extent);
+ holder.updateMatrixWorld(true);
+ // 회전 전 모델을 바닥 중심에 놓는다. 좌표는 holder의 로컬 단위로 변환.
+ bounds.setFromObject(holder,true);
  const center=bounds.getCenter(new THREE.Vector3());
- model.position.x-=center.x;
- model.position.y-=bounds.min.y;
- model.position.z-=center.z;
- outer.updateMatrixWorld(true);
- // X축으로 긴 선체는 Z축 방향으로 회전
- if(!person&&size.x>size.z)outer.rotation.y=Math.PI/2;
- outer.updateMatrixWorld(true);
- // 최종 크기를 다시 측정해 GLB 내부 변환까지 반영한다.
- bounds.setFromObject(outer,true);size=bounds.getSize(new THREE.Vector3());
- const finalMeasure=person?size.y:Math.max(size.x,size.z);
- if(finalMeasure>1e-7)outer.scale.multiplyScalar(targetLength/finalMeasure);
- outer.updateMatrixWorld(true);
- return outer;
+ model.position.x-=center.x/holder.scale.x;
+ model.position.z-=center.z/holder.scale.z;
+ model.position.y-=bounds.min.y/holder.scale.y;
+ holder.updateMatrixWorld(true);
+ // 수평 장축이 X일 때만 함선 전체를 회전.
+ if(!person&&initialSize.x>initialSize.z)holder.rotation.y=Math.PI/2;
+ holder.updateMatrixWorld(true);
+ return holder;
 }
 function shipAnchor(x,z,length=.44){
  const root=new THREE.Group();root.position.set(x,0,z);
  const hull=normalized(shipSource,length);root.add(hull);
+ fleet.add(root);vessels.push(root);
+ // 화면에 1척이 꽉 차는 오류를 즉시 알아볼 수 있도록 실제 크기를 출력.
  root.updateMatrixWorld(true);
- const finalBox=new THREE.Box3().setFromObject(root,true);
- const finalSize=finalBox.getSize(new THREE.Vector3());
- const maxHorizontal=Math.max(finalSize.x,finalSize.z);
- if(maxHorizontal>length*1.02){hull.scale.multiplyScalar(length/maxHorizontal);root.updateMatrixWorld(true);}
- if(vessels.length===0)console.info('판옥선 최종 크기:',new THREE.Box3().setFromObject(root,true).getSize(new THREE.Vector3()));
- fleet.add(root);vessels.push(root);return root;
+ const actual=new THREE.Box3().setFromObject(root,true).getSize(new THREE.Vector3());
+ console.info('판옥선 '+vessels.length+' 실제 크기:',actual.toArray(),'목표 길이:',length);
+ return root;
 }
 function clearFleet(){while(fleet.children.length)fleet.remove(fleet.children[0]);vessels.length=0;actor=null;leader=null;playing=false;$('counter').textContent='판옥선 0 / 12척';}
 function attachAdmiral(root){
@@ -131,7 +138,7 @@ loader.load(MODEL,g=>{shipSource=g.scene;shipReady=true;console.info('원본 판
 loader.load(ADMIRAL,g=>{admiralSource=g.scene;admiralReady=true;if((current===1||current===2)&&leader&&!actor)attachAdmiral(leader);},undefined,e=>{console.error(e);$('loadStatus').textContent+=' · 장군 GLB 로딩 실패';});
 function sceneCamera(){
  // 함대 전체가 보이는 1막, 기함과 장군을 강조하는 2·3막, 실사 해협을 강조하는 4막
- const positions=[ [0,4.5,7.8],[0,2.7,5.0],[0,1.25,2.1],[0,1.05,2.5],[0,2.7,4.7] ];
+ const positions=[ [0,4.2,7.0],[0,2.7,5.0],[0,1.25,2.1],[0,1.05,2.5],[0,2.7,4.7] ];
  const targets=[ [0,0,-.3],[0,.12,-.15],[0,.17,0],[0,0,-1.8],[0,0,-.2] ];
  camera.position.set(...positions[current]);orbit.target.set(...targets[current]);
  orbit.minDistance=2.4;orbit.maxDistance=18;orbit.update();
