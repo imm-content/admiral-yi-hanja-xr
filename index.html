@@ -70,56 +70,71 @@ const vessels=[];let actor=null,leader=null,playing=false,leaderStart=0;
 const loader=new GLTFLoader();
 const tmpBox=new THREE.Box3(), tmpSize=new THREE.Vector3(), tmpCenter=new THREE.Vector3();
 function normalized(source,targetLength,person=false){
- // GLB 원본의 중첩 변환을 그대로 유지하고 최상위 wrapper에만 정규화 변환 적용
- const model=source.clone(true),holder=new THREE.Group();holder.add(model);
- model.updateMatrixWorld(true);
- const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
+ // 모델을 복제한 뒤 실제 최종 렌더링 경계상자로 크기를 정한다.
+ const outer=new THREE.Group();
+ const model=source.clone(true);outer.add(model);
+ outer.updateMatrixWorld(true);
+ let bounds=new THREE.Box3().setFromObject(outer,true);
+ let size=bounds.getSize(new THREE.Vector3());
  const measure=person?size.y:Math.max(size.x,size.z);
- if(!Number.isFinite(measure)||measure<1e-8)throw Error('GLB 경계상자 분석 실패');
- const scale=targetLength/measure;
- holder.scale.setScalar(scale);
- holder.position.set(-center.x*scale,-box.min.y*scale,-center.z*scale);
- // 선체의 길이 방향을 Z축으로 맞춤
- const outer=new THREE.Group();outer.add(holder);
+ if(!Number.isFinite(measure)||measure<1e-7)throw Error('GLB 크기를 계산할 수 없습니다');
+ // model에만 크기 변환을 적용하고, outer는 복제 후 위치 배치에 사용한다.
+ model.scale.multiplyScalar(targetLength/measure);
+ outer.updateMatrixWorld(true);
+ bounds.setFromObject(outer,true);
+ const center=bounds.getCenter(new THREE.Vector3());
+ model.position.x-=center.x;
+ model.position.y-=bounds.min.y;
+ model.position.z-=center.z;
+ outer.updateMatrixWorld(true);
+ // X축으로 긴 선체는 Z축 방향으로 회전
  if(!person&&size.x>size.z)outer.rotation.y=Math.PI/2;
  outer.updateMatrixWorld(true);
- // 실제 렌더링 후 치수로 재검증해 과대 확대 방지
- const check=new THREE.Box3().setFromObject(outer),cs=check.getSize(new THREE.Vector3());
- const length=Math.max(cs.x,cs.z);
- if(!person&&length>targetLength*1.05)outer.scale.multiplyScalar(targetLength/length);
+ // 최종 크기를 다시 측정해 GLB 내부 변환까지 반영한다.
+ bounds.setFromObject(outer,true);size=bounds.getSize(new THREE.Vector3());
+ const finalMeasure=person?size.y:Math.max(size.x,size.z);
+ if(finalMeasure>1e-7)outer.scale.multiplyScalar(targetLength/finalMeasure);
+ outer.updateMatrixWorld(true);
  return outer;
 }
 function shipAnchor(x,z,length=.44){
  const root=new THREE.Group();root.position.set(x,0,z);
  const hull=normalized(shipSource,length);root.add(hull);
+ root.updateMatrixWorld(true);
+ const finalBox=new THREE.Box3().setFromObject(root,true);
+ const finalSize=finalBox.getSize(new THREE.Vector3());
+ const maxHorizontal=Math.max(finalSize.x,finalSize.z);
+ if(maxHorizontal>length*1.02){hull.scale.multiplyScalar(length/maxHorizontal);root.updateMatrixWorld(true);}
+ if(vessels.length===0)console.info('판옥선 최종 크기:',new THREE.Box3().setFromObject(root,true).getSize(new THREE.Vector3()));
  fleet.add(root);vessels.push(root);return root;
 }
 function clearFleet(){while(fleet.children.length)fleet.remove(fleet.children[0]);vessels.length=0;actor=null;leader=null;playing=false;$('counter').textContent='판옥선 0 / 12척';}
 function attachAdmiral(root){
  if(!admiralSource){$('loadStatus').textContent='장군 GLB 로딩 중입니다.';return;}
  // 장군은 기함의 자식 객체: 갑판 위에서 배와 함께 움직입니다.
- const hull=root.children[0];hull.updateMatrixWorld(true);
+ const hull=root.children[0];root.updateMatrixWorld(true);
  const box=new THREE.Box3().setFromObject(hull),sz=box.getSize(new THREE.Vector3());
  // 중앙 갑판 위의 적절한 위치를 찾기 위해 선체 상부로부터 레이캐스팅
  const px=0,pz=.02;
  const ray=new THREE.Raycaster(new THREE.Vector3(px,box.max.y+.5,pz),new THREE.Vector3(0,-1,0));
  const hits=ray.intersectObject(hull,true);
  const deck=hits.find(h=>h.point.y>box.min.y+sz.y*.18 && h.point.y<box.max.y-sz.y*.08);
- const y=deck?deck.point.y:box.min.y+sz.y*.46;
+ const y=deck?deck.point.y:box.min.y+sz.y*.56;
  actor=normalized(admiralSource,.20,true);
- actor.position.set(px,y+.006,pz);
- actor.rotation.y=0; // 장군 정면이 카메라를 향하도록 초기화, 필요하면 방향 버튼으로 전환
+ const localDeck=root.worldToLocal(new THREE.Vector3(px,y+.006,pz));
+ actor.position.copy(localDeck);
+ actor.rotation.y=Math.PI; // 기본 방향은 선수 방향, 필요하면 방향 버튼으로 전환
  root.add(actor);
  $('loadStatus').textContent='장군을 대장선 갑판 위에 배치했습니다.';
 }
-loader.load(MODEL,g=>{shipSource=g.scene;shipReady=true;$('loadStatus').textContent='판옥선 GLB 준비 완료. 체험 시작을 누르세요.';},undefined,e=>{console.error(e);$('loadStatus').textContent='판옥선 GLB 로딩 실패. F12 Console 확인';});
+loader.load(MODEL,g=>{shipSource=g.scene;shipReady=true;console.info('원본 판옥선 크기',new THREE.Box3().setFromObject(shipSource,true).getSize(new THREE.Vector3()));$('loadStatus').textContent='판옥선 GLB 준비 완료. 체험 시작을 누르세요.';},undefined,e=>{console.error(e);$('loadStatus').textContent='판옥선 GLB 로딩 실패. F12 Console 확인';});
 loader.load(ADMIRAL,g=>{admiralSource=g.scene;admiralReady=true;if((current===1||current===2)&&leader&&!actor)attachAdmiral(leader);},undefined,e=>{console.error(e);$('loadStatus').textContent+=' · 장군 GLB 로딩 실패';});
 function sceneCamera(){
  // 함대 전체가 보이는 1막, 기함과 장군을 강조하는 2·3막, 실사 해협을 강조하는 4막
- const positions=[ [0,3.3,5.6],[0,2.2,4.0],[0,1.25,2.1],[0,1.05,2.5],[0,2.7,4.7] ];
+ const positions=[ [0,4.5,7.8],[0,2.7,5.0],[0,1.25,2.1],[0,1.05,2.5],[0,2.7,4.7] ];
  const targets=[ [0,0,-.3],[0,.12,-.15],[0,.17,0],[0,0,-1.8],[0,0,-.2] ];
  camera.position.set(...positions[current]);orbit.target.set(...targets[current]);
- orbit.minDistance=1.3;orbit.maxDistance=12;orbit.update();
+ orbit.minDistance=2.4;orbit.maxDistance=18;orbit.update();
 }
 function renderLesson(){const s=lessons[current];$('sceneTitle').textContent=s[0];$('hanja').textContent=s[1];$('reading').textContent=s[2];$('meaning').textContent=s[3];$('explain').textContent=s[4];$('question').textContent=s[5];$('choices').replaceChildren();$('result').textContent='';s[6].forEach((v,i)=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>$('result').textContent=i===s[7]?'정답입니다!':'다시 생각해 보세요.';$('choices').append(b)});
  $('nav').replaceChildren();lessons.forEach((l,i)=>{const b=document.createElement('button');b.textContent=(i+1)+'막';if(i===current)b.className='active';b.onclick=()=>{current=i;reset()};$('nav').append(b)});
