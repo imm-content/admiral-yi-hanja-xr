@@ -110,7 +110,7 @@ Promise.allSettled(Array.from({length:4},()=>loadExtra(['./assets/japanese_warsh
  if(!enemyLoaded)console.warn('일본군 함선 일부 로딩 실패',enemyFleet.length);
 });
 function placeEnemyFleet(){
- const positions=[[.45,-1.1],[1.45,-1.75],[-.45,-2.25],[.65,-3.05]];
+ const positions=[[.50,.15],[1.35,-.45],[-.35,-.85],[.85,-1.55]];
  enemyFleet.forEach((e,i)=>{e.visible=true;e.position.set(positions[i][0],0,positions[i][1]);e.rotation.set(0,Math.PI,0);e.scale.setScalar(1);});
 }
 let current=0,run=0,ready=false,activeTime=0,act=0,shakeEnd=0,burstNext=0;const bursts=[];let audioCtx=null;
@@ -130,35 +130,53 @@ async function loadFleet(){
  statusMsg(fleetReady?'판옥선 12척 준비 완료 · 체험 시작을 누르세요.':'일부 함선 로딩 실패 · 파일 경로를 확인하세요.');
 }
 
-function choose(n){run++;battleNarrationId++;act=0;current=n;window.speechSynthesis?.cancel();ships.forEach(s=>{if(s)s.visible=false});if(admiral3D)admiral3D.visible=false;enemyFleet.forEach(e=>e.visible=false);islandGroup.visible=false;clearShots();clearFireSmoke();enemySinkTimes.clear();battleShotsFired=0;$('count').style.display='none';$('view').classList.remove('shake');resetCamera();bursts.forEach(b=>world.remove(b));bursts.length=0;const d=scenes[n];$('sceneTitle').textContent=d.title;$('hanja').textContent=d.hanja;$('reading').textContent=d.reading;$('meaning').textContent=d.meaning;$('explain').textContent=d.explain;$('question').textContent=d.question;$('result').textContent='';$('choices').replaceChildren();d.choices.forEach((choice,i)=>{const b=document.createElement('button');b.textContent=choice;b.onclick=()=>$('result').textContent=i===d.answer?'정답입니다!':'다시 생각해 보세요.';$('choices').append(b)});$('nav').replaceChildren();scenes.forEach((x,i)=>{const b=document.createElement('button');b.textContent=(i+1)+'막';if(i===n)b.classList.add('active');b.onclick=()=>choose(i);$('nav').append(b)});$('play').textContent='▶ 제'+(n+1)+'막 체험 시작';$('badge').textContent=d.title;statusMsg(ready?'▶ 체험 시작을 누르세요.':'대장선 모델을 불러오는 중입니다…')}
-function voice(){const vs=speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('ko'));return vs.find(v=>/male|남성|injoon|준우|현우|민준|영훈|대성/i.test(v.name))||vs[0]||null}
-function speakText(text,rate=.83){if(!('speechSynthesis' in window))return;const u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=rate;u.pitch=.68;const v=voice();if(v)u.voice=v;speechSynthesis.speak(u)}
+function choose(n){stopMissFire();run++;battleNarrationId++;act=0;current=n;window.speechSynthesis?.cancel();ships.forEach(s=>{if(s)s.visible=false});if(admiral3D)admiral3D.visible=false;enemyFleet.forEach(e=>e.visible=false);islandGroup.visible=false;clearShots();clearFireSmoke();enemySinkTimes.clear();battleShotsFired=0;$('count').style.display='none';$('view').classList.remove('shake');resetCamera();bursts.forEach(b=>world.remove(b));bursts.length=0;const d=scenes[n];$('sceneTitle').textContent=d.title;$('hanja').textContent=d.hanja;$('reading').textContent=d.reading;$('meaning').textContent=d.meaning;$('explain').textContent=d.explain;$('question').textContent=d.question;$('result').textContent='';$('choices').replaceChildren();d.choices.forEach((choice,i)=>{const b=document.createElement('button');b.textContent=choice;b.onclick=()=>$('result').textContent=i===d.answer?'정답입니다!':'다시 생각해 보세요.';$('choices').append(b)});$('nav').replaceChildren();scenes.forEach((x,i)=>{const b=document.createElement('button');b.textContent=(i+1)+'막';if(i===n)b.classList.add('active');b.onclick=()=>choose(i);$('nav').append(b)});$('play').textContent='▶ 제'+(n+1)+'막 체험 시작';$('badge').textContent=d.title;statusMsg(ready?'▶ 체험 시작을 누르세요.':'대장선 모델을 불러오는 중입니다…')}
+function voice(kind='male'){
+ const vs=speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('ko'));
+ const male=/male|남성|injoon|준우|현우|민준|영훈|대성|heami-male/i;
+ const female=/female|여성|heami|유나|서연|지민|수진|선희/i;
+ return (kind==='female'?vs.find(v=>female.test(v.name)&&!male.test(v.name)):vs.find(v=>male.test(v.name)&&!female.test(v.name)))||vs[0]||null;
+}
+function speakText(text,rate=.83){if(!('speechSynthesis' in window))return;const u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=rate;u.pitch=.68;const v=voice(current>=3?'female':'male');if(v)u.voice=v;speechSynthesis.speak(u)}
 const battleLines=[
  '명량해전. 1597년 음력 9월, 이순신이 이끄는 조선 수군은 명량해협에서 일본 수군과 맞섰습니다.',
  '조선 수군은 좁은 물길과 빠른 조류, 판옥선의 화포를 활용하여 수적으로 우세한 일본 수군에 맞섰습니다.',
  '전투가 치열하게 이어졌지만 조선 수군은 끝내 적의 진격을 막아내었습니다.',
  '명량해전은 어려운 상황에서도 지휘와 용기로 싸운 역사로 기억됩니다.'
 ];
-let battleNarrationId=0;
+let battleNarrationId=0;let battleMissTimer=null;
+function stopMissFire(){if(battleMissTimer!==null){clearInterval(battleMissTimer);battleMissTimer=null;}}
 function narration(n){
  window.speechSynthesis?.cancel();
  if(n===4){
   const token=run, narrationId=++battleNarrationId;
   const nextLine=i=>{
    if(token!==run||act!==5||narrationId!==battleNarrationId||i>=battleLines.length)return;
-   const afterSentence=()=>{
-    if(token!==run||act!==5||narrationId!==battleNarrationId)return;
-    // 문장 낭독 종료 후 정확히 한 척을 겨냥해 포격합니다.
-    const target=enemyFleet[i];
-    if(target&&target.visible){fireCannon(performance.now()/1000,target);}
-    else statusMsg('일본군 '+(i+1)+'번 함선 로딩을 확인해 주세요.');
-    // 포탄 비행과 폭발을 보여준 뒤 다음 문장을 읽습니다.
-    setTimeout(()=>nextLine(i+1),2300);
+   let ended=false;
+   const active=()=>token===run&&act===5&&narrationId===battleNarrationId&&!ended;
+   const startHarassment=()=>{
+    stopMissFire();
+    // 낭독 중에는 판옥선이 포격하지만 포탄은 바다에 떨어지며 적선은 침몰하지 않습니다.
+    if(active())fireMissCannon(performance.now()/1000);
+    battleMissTimer=setInterval(()=>{if(active())fireMissCannon(performance.now()/1000);else stopMissFire();},2200);
    };
-   if(!('speechSynthesis' in window)){statusMsg('음성 합성을 지원하지 않는 브라우저입니다.');setTimeout(afterSentence,5000);return;}
+   const afterSentence=()=>{
+    if(ended)return;ended=true;stopMissFire();
+    if(token!==run||act!==5||narrationId!==battleNarrationId)return;
+    // 문장 끝에서만 명중 포격을 발사하고, 정확히 한 척을 침몰시킵니다.
+    const target=enemyFleet[i];
+    if(target&&target.visible)fireCannon(performance.now()/1000,target);
+    else statusMsg('일본군 '+(i+1)+'번 함선 로딩을 확인해 주세요.');
+    setTimeout(()=>nextLine(i+1),2800);
+   };
+   if(!('speechSynthesis' in window)){
+    statusMsg('음성 합성을 지원하지 않는 브라우저입니다.');
+    startHarassment();setTimeout(afterSentence,6500);return;
+   }
    const u=new SpeechSynthesisUtterance(battleLines[i]);
-   u.lang='ko-KR';u.rate=.82;u.pitch=.68;
-   const v=voice();if(v)u.voice=v;
+   u.lang='ko-KR';u.rate=.82;u.pitch=1.0;
+   const v=voice('female');if(v)u.voice=v;
+   u.onstart=startHarassment;
    u.onend=afterSentence;
    u.onerror=()=>{if(token===run)statusMsg('음성 재생 오류 · 다음 전투 장면으로 진행합니다.');afterSentence();};
    speechSynthesis.speak(u);
@@ -179,7 +197,7 @@ function boom(){if(!audioCtx)return;const now=audioCtx.currentTime;const o=audio
 function spray(){const geo=new THREE.SphereGeometry(.035,6,5),mat=new THREE.MeshBasicMaterial({color:0xd7edf1,transparent:true,opacity:.75});for(let i=0;i<10;i++){const m=new THREE.Mesh(geo,mat.clone());m.position.set((Math.random()-.5)*5,.05,Math.random()*3-1.5);world.add(m);bursts.push(m);setTimeout(()=>{world.remove(m);m.geometry.dispose();m.material.dispose();const j=bursts.indexOf(m);if(j>=0)bursts.splice(j,1)},700)}}
 function play(){
  if(!ready){statusMsg('첫 번째 판옥선 로딩 중입니다. 잠시 기다려 주세요.');return}
- run++;battleNarrationId++;window.speechSynthesis?.cancel();act=current+1;act1Spoken=false;activeTime=performance.now()/1000;
+ stopMissFire();run++;battleNarrationId++;window.speechSynthesis?.cancel();act=current+1;act1Spoken=false;activeTime=performance.now()/1000;
  ships.forEach((s,i)=>{if(!s)return;s.visible=act===1?i===0:act===2||act===3;s.position.set(coords[i][0],0,coords[i][1]);s.rotation.set(0,0,0);s.scale.setScalar(1)});
  if(admiral3D)admiral3D.visible=false;
  enemyFleet.forEach(e=>e.visible=false);
@@ -206,7 +224,7 @@ function play(){
  }
  if(act===5){
   ships.forEach(s=>{if(s)s.visible=false});[0,1,2].forEach((i)=>{if(ships[i])ships[i].visible=true});
-  ships[0].position.set(-1.0,0,.65);if(ships[1])ships[1].position.set(-1.8,0,-.25);if(ships[2])ships[2].position.set(-.15,0,-.55);
+  ships[0].position.set(-.95,0,1.50);if(ships[1])ships[1].position.set(-1.75,0,.60);if(ships[2])ships[2].position.set(-.05,0,.45);
   if(enemyFleet.length)placeEnemyFleet();else statusMsg('일본군 함선 로딩 중 · 완료되면 등장합니다.');
   statusMsg(enemyLoaded?'명량해전 · 포격과 일본군 함선 침몰':'명량해전 · 일본군 GLB 로딩 여부 확인 필요');
   narration(4);return;
@@ -222,6 +240,16 @@ function fireCannon(t,target){
  const end=target.position.clone().add(new THREE.Vector3(0,.23,0));
  const mesh=new THREE.Mesh(cannonGeo,cannonMat);mesh.position.copy(start);shotGroup.add(mesh);
  shots.push({mesh,start,end,target,born:t,duration:1.05});battleShotsFired++;boom();
+ $('view').classList.remove('shake');void $('view').offsetWidth;$('view').classList.add('shake');
+}
+// 낭독 도중의 포격: 일부러 바다에 떨어지며 적선에는 피해가 없습니다.
+function fireMissCannon(t){
+ if(act!==5||!ships[0])return;
+ const attacker=ships[battleShotsFired%3]||ships[0];
+ const start=attacker.position.clone().add(new THREE.Vector3(.12,.28,-.1));
+ const end=new THREE.Vector3((Math.random()-.5)*2.7,.035,-.25-Math.random()*1.6);
+ const mesh=new THREE.Mesh(cannonGeo,cannonMat);mesh.position.copy(start);shotGroup.add(mesh);
+ shots.push({mesh,start,end,target:null,born:t,duration:.9,miss:true});battleShotsFired++;boom();
  $('view').classList.remove('shake');void $('view').offsetWidth;$('view').classList.add('shake');
 }
 // 피격 지점에 화염과 검은 연기를 발생시키는 간단한 3D 입자 효과
@@ -269,7 +297,7 @@ renderer.setAnimationLoop(t=>{
   // 포격은 타이머가 아니라 내레이션 각 문장의 onend 이벤트에서만 발생합니다.
   for(let i=shots.length-1;i>=0;i--){const o=shots[i],f=Math.min(1,(time-o.born)/o.duration);
    o.mesh.position.lerpVectors(o.start,o.end,f);o.mesh.position.y+=Math.sin(Math.PI*f)*.65;
-   if(f>=1){shotGroup.remove(o.mesh);shots.splice(i,1);spray();if(!enemySinkTimes.has(o.target)){enemySinkTimes.set(o.target,time);boom();igniteShip(o.target,time);}}
+   if(f>=1){shotGroup.remove(o.mesh);shots.splice(i,1);spray();if(!o.miss&&o.target&&!enemySinkTimes.has(o.target)){enemySinkTimes.set(o.target,time);boom();igniteShip(o.target,time);}}
   }
   enemyFleet.forEach((e,i)=>{if(!enemySinkTimes.has(e))return;const f=Math.min(1,(time-enemySinkTimes.get(e))/4.5);
    e.position.y=-f*.95;e.rotation.z=(i%2?-.9:.9)*f;
