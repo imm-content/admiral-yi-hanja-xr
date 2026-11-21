@@ -489,12 +489,14 @@ function animateBattleEffects(time){
 const boatRoot=new THREE.Group();world.add(boatRoot);
 // 각 판옥선은 world의 독립적인 3D 객체입니다. 한 척씩 보이도록 제어합니다.
 const reinforcementShips=[];
+// 4열 × 3행. 좌표는 8×8 수면 안에서 서로 겹치지 않도록 배치.
 const fleetPositions=[
- [0,-2.45],[-1.25,-2.45],[1.25,-2.45],
- [-1.25,-.95],[0,-.95],[1.25,-.95],
- [-1.25,.55],[0,.55],[1.25,.55],
- [-1.25,2.05],[0,2.05],[1.25,2.05]
+ [-1.65,-1.9],[-.55,-1.9],[.55,-1.9],[1.65,-1.9],
+ [-1.65,-.35],[-.55,-.35],[.55,-.35],[1.65,-.35],
+ [-1.65,1.2],[-.55,1.2],[.55,1.2],[1.65,1.2]
 ];
+const SHIP_SCALE=.34;
+const SHIP_LIFT=.32;
 const fleetCount=document.querySelector('#fleetCount'),hanjaCaption=document.querySelector('#hanjaCaption');
 let fleetStart=0,fleetJoining=false,fleetNarrated=false;
 function resetReinforcements(){
@@ -524,27 +526,24 @@ Promise.all([load(base+'Sketchfab_panokseon.glb'),load(base+'admiral-yi-sunsin.g
 // 판옥선 원본 GLB를 정규화한 상태에서 11개 독립 복제합니다.
 // 원본 모델의 재질/지오메트리는 재사용하되 각 배의 transform과 visibility는 독립입니다.
 // 파도 shader는 정점 위치를 위아래로 이동시키므로 수면 아래에 배가 가려지는 문제를 방지합니다.
-const fleetScale=.48;
+const fleetScale=SHIP_SCALE;
 for(let i=1;i<12;i++){
- const copy=ship.clone(true);
- const root=new THREE.Group();root.name='Panokseon_'+(i+1);
- root.add(copy);root.scale.setScalar(fleetScale);
- // 바다 파도보다 위에 배치하고, 원본과 독립적으로 유지합니다.
- root.position.set(fleetPositions[i][0],1.02+(-b.min.y-.045)*fleetScale,fleetPositions[i][1]);
- root.visible=false;
- // shader로 솟는 수면이 배를 가려도 배가 화면에 표시되도록 깊이 검사만 복제본에 한해 해제.
- // 원본의 material에 영향을 주지 않도록 재질을 개별 복제합니다.
- copy.traverse(obj=>{if(obj.isMesh){
-   obj.material=Array.isArray(obj.material)?obj.material.map(m=>m.clone()):obj.material.clone();
-   for(const mat of (Array.isArray(obj.material)?obj.material:[obj.material])){
-     mat.depthTest=false;mat.depthWrite=false;mat.needsUpdate=true;
-   }
-   obj.renderOrder=20;obj.frustumCulled=false;
- }});
- world.add(root);reinforcementShips.push(root);
+  // 판옥선 한 척의 정규화된 GLB를 복제하고, 부모 그룹을 서로 다른 위치에 둡니다.
+  const root=new THREE.Group();
+  root.name='Panokseon_'+(i+1);
+  const copy=ship.clone(true);
+  root.add(copy);
+  root.scale.setScalar(fleetScale);
+  root.position.set(fleetPositions[i][0],SHIP_LIFT+(-b.min.y-.045)*fleetScale,fleetPositions[i][1]);
+  root.visible=false;
+  world.add(root);
+  reinforcementShips.push(root);
 }
+// 검증용: 각 모델의 월드 좌표가 실제로 다른지 콘솔에서 확인 가능
+world.updateMatrixWorld(true);
+console.table(reinforcementShips.map((r,i)=>({ship:i+2,x:r.position.x,z:r.position.z})));
 b=new THREE.Box3().setFromObject(ship);size=b.getSize(new THREE.Vector3());const length=Math.max(size.x,size.z),width=Math.min(size.x,size.z),axis=size.x>=size.z?'x':'z';const fb=new THREE.Box3().setFromObject(f),fs=fb.getSize(new THREE.Vector3()),fc=fb.getCenter(new THREE.Vector3());f.position.set(-fc.x,-fb.min.y,-fc.z);f.scale.setScalar(1/Math.max(fs.y,.001));admiral=new THREE.Group();admiral.add(f);boatRoot.add(admiral);const x=(axis==='x'?.97:.4)*0; // keep original positioning formula below
-const forward=.97*length*.44,side=.4*width*.44;const px=axis==='x'?forward:side,pz=axis==='z'?forward:side;const ray=new THREE.Raycaster(new THREE.Vector3(px,b.max.y+1,pz),new THREE.Vector3(0,-1,0));const hits=ray.intersectObject(ship,true);let deck=hits.find(h=>h.point.y>b.min.y+size.y*.1&&h.point.y<b.min.y+size.y*.55);admiral.position.set(px,deck?.point.y??b.min.y+size.y*.32,pz);admiral.scale.setScalar(length*.45*.34);admiral.rotation.y=Math.PI+(axis==='x'?Math.PI/2:0);boatBaseY=-b.min.y-.045;boatRoot.position.y=1.02+boatBaseY*.48;ready=true;preview.disabled=false;again.disabled=false;document.querySelector('#enemyStart').disabled=!enemyModelReady;world.visible=true;reset();setStatus(enemyModelReady?'모델 3종 준비 완료. 항해 또는 일본군 함선 등장을 시작하세요.':'판옥선·장군 준비 완료. 일본군 함선 40MB 모델을 불러오는 중입니다…');}).catch(e=>{console.error(e);setStatus('모델 로딩 실패: '+e.message+' · 기존 저장소 파일 경로를 확인하세요.')});
+const forward=.97*length*.44,side=.4*width*.44;const px=axis==='x'?forward:side,pz=axis==='z'?forward:side;const ray=new THREE.Raycaster(new THREE.Vector3(px,b.max.y+1,pz),new THREE.Vector3(0,-1,0));const hits=ray.intersectObject(ship,true);let deck=hits.find(h=>h.point.y>b.min.y+size.y*.1&&h.point.y<b.min.y+size.y*.55);admiral.position.set(px,deck?.point.y??b.min.y+size.y*.32,pz);admiral.scale.setScalar(length*.45*.34);admiral.rotation.y=Math.PI+(axis==='x'?Math.PI/2:0);boatBaseY=-b.min.y-.045;boatRoot.position.y=SHIP_LIFT+boatBaseY*SHIP_SCALE;ready=true;preview.disabled=false;again.disabled=false;document.querySelector('#enemyStart').disabled=!enemyModelReady;world.visible=true;reset();setStatus(enemyModelReady?'모델 3종 준비 완료. 항해 또는 일본군 함선 등장을 시작하세요.':'판옥선·장군 준비 완료. 일본군 함선 40MB 모델을 불러오는 중입니다…');}).catch(e=>{console.error(e);setStatus('모델 로딩 실패: '+e.message+' · 기존 저장소 파일 경로를 확인하세요.')});
 function speakActOne(){
  if(!voiceEnabled||!ttsSupported)return;
  try{
@@ -561,11 +560,11 @@ function speakActOne(){
 function reset(){
  resetReinforcements();wakeStrength=0;previousWakeZ=null;previousWakeTime=null;wake.visible=false;
  resetEnemies();active=false;userYaw=0;userScale=1;
- boatRoot.position.set(fleetPositions[0][0],1.02+boatBaseY*.48,fleetPositions[0][1]);
- boatRoot.scale.setScalar(.48);boatRoot.rotation.set(0,SAIL_HEADING,0);
+ boatRoot.position.set(fleetPositions[0][0],SHIP_LIFT+boatBaseY*SHIP_SCALE,fleetPositions[0][1]);
+ boatRoot.scale.setScalar(SHIP_SCALE);boatRoot.rotation.set(0,SAIL_HEADING,0);
 }
 function begin(){
- if(!ready)return;world.visible=true;stopNarration();reset();joinFleet();if(!arSession){camera.position.set(0,5.0,8.0);orbit.target.set(0,.65,0);orbit.update();}
+ if(!ready)return;world.visible=true;stopNarration();reset();joinFleet();if(!arSession){camera.position.set(0,2.8,6.5);orbit.target.set(0,.1,0);orbit.update();}
  setStatus('판옥선이 한 척씩 나타납니다. 12척이 모이면 한자 독음과 뜻을 읽습니다.');
  badge.textContent='제1막 · 판옥선 12척 집결';
 }
@@ -592,9 +591,9 @@ let touchX=null;view.addEventListener('pointerdown',e=>{if(arSession&&placed)tou
 renderer.setAnimationLoop((t,frame)=>{const elapsed=t/1000;
  if(seaMat.userData.waveShader)seaMat.userData.waveShader.uniforms.uWaveTime.value=elapsed;
  // 제1막 선단은 정지 상태로 유지합니다. 항적도 표시하지 않습니다.
- boatRoot.scale.setScalar(.48*userScale);
+ boatRoot.scale.setScalar(SHIP_SCALE*userScale);
  boatRoot.rotation.y=SAIL_HEADING+userYaw;
  boatRoot.rotation.x=0;boatRoot.rotation.z=0;
- boatRoot.position.y=1.02+boatBaseY*.48;
+ boatRoot.position.y=SHIP_LIFT+boatBaseY*SHIP_SCALE;
  if(arSession&&frame&&!placed&&hitSource){const results=frame.getHitTestResults(hitSource);if(results.length){const pose=results[0].getPose(refSpace);if(pose){hitMatrix.fromArray(pose.transform.matrix);marker.position.setFromMatrixPosition(hitMatrix);marker.quaternion.setFromRotationMatrix(hitMatrix);marker.visible=true;place.dataset.found='1';place.disabled=false;badge.textContent='표면 인식 완료 · 바다 배치 버튼을 누르세요'}}else{marker.visible=false;place.dataset.found='';place.disabled=false}}animateReinforcements(elapsed);animateEnemies(elapsed);animateBattleEffects(elapsed);if(!arSession)orbit.update();renderer.render(scene,camera)});
 </script></body></html>
