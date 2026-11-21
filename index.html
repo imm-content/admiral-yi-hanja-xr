@@ -1,5 +1,5 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>이순신 한자학습 XR — 제1막 희망의 열두 척 (12척 합류)</title><style>*{box-sizing:border-box}body{margin:0;background:#0c1d30;color:white;font-family:system-ui,'Malgun Gothic',sans-serif}header{padding:13px 16px;background:#172f4a}h2{margin:0;font-size:21px}small{color:#c7d9ea}#view{height:calc(100dvh - 205px);min-height:260px;position:relative;touch-action:none} @media(max-width:650px){header{padding:7px 10px}h2{font-size:17px}small{font-size:11px}#view{height:calc(100dvh - 185px);min-height:210px}#status{font-size:12px;padding:6px 10px;min-height:30px}#panel{position:fixed;bottom:0;left:0;right:0;z-index:1000;display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:7px;background:#233e59ee}#panel button{padding:10px 3px;font-size:12px;min-height:42px}.note{display:none}#badge{font-size:11px;top:5px;left:5px}}#status{background:#142d48;padding:12px;min-height:44px}#panel{display:flex;flex-wrap:wrap;gap:9px;padding:12px;background:#233e59}button{background:#f3d17e;color:#182b3c;border:0;border-radius:7px;padding:12px;font-weight:700;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.note{padding:12px;font-size:13px;color:#c9d8e9}#badge{position:absolute;top:12px;left:12px;background:#14283dbd;padding:9px;border-radius:7px;font-size:13px;pointer-events:none}#reticle{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:48px;border:3px solid #00ff66;border-radius:50%;pointer-events:none}.in-ar #panel{position:fixed;z-index:9999;bottom:0;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;background:#18354bcc;padding:6px;gap:5px}.in-ar #panel button{padding:9px 7px;font-size:12px}.in-ar #status{position:fixed;top:3px;left:3px;right:3px;z-index:9998;background:#18354bbb;font-size:12px}.in-ar header,.in-ar .note{display:none}.in-ar #view{height:100dvh} #historyCard{position:fixed;top:70px;left:12px;right:12px;z-index:10005;max-width:560px;margin:auto;background:rgba(10,30,49,.94);color:#fff;border:1px solid #dfc181;border-radius:12px;padding:14px 16px;box-shadow:0 6px 25px #0006;display:none;pointer-events:auto}#historyCard strong{display:block;color:#ffdf8e;font-size:16px;margin-bottom:6px}#historyCard p{margin:0;line-height:1.55;font-size:14px}#historyCard .foot{font-size:11px;color:#b9cbd7;margin-top:8px}#historyClose{position:absolute;right:8px;top:6px;background:transparent;color:white;padding:4px 9px;font-size:19px}.in-ar #historyCard{top:92px;max-width:90vw;padding:10px 12px}/* 카메라 AR에서는 화면을 가리는 해설 카드만 숨기고 음성은 유지 */.in-ar #historyCard{display:none!important}.in-ar #historyCard p{font-size:12px}.in-ar #historyCard strong{font-size:14px}@media(max-width:650px){#historyCard{top:60px;left:8px;right:8px;padding:10px 12px}#historyCard p{font-size:12px}}
-#enemyStart,#fireStart,#enemyDirection,#historyToggle{display:none!important}#hanjaCaption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:5;text-align:center;pointer-events:none;width:min(92%,780px);padding:12px 20px;background:rgba(7,25,43,.78);border:1px solid rgba(255,255,255,.26);border-radius:12px;color:#fff;opacity:0;transition:opacity .5s ease;text-shadow:0 2px 6px #000}#hanjaCaption.visible{opacity:1}#hanjaCaption .hanja{font-size:clamp(22px,3vw,42px);font-weight:800;letter-spacing:.13em;line-height:1.3}#hanjaCaption .hangul{font-size:clamp(12px,1.2vw,17px);margin-top:5px;color:#e5f1ff}#fleetCount{position:absolute;top:12px;right:12px;z-index:5;background:rgba(7,25,43,.78);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;display:none}</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"}}</script></head><body><header><h2>제1막 · 희망의 열두 척</h2><small>今臣戰船 尙有十二 · 지금 신에게는 아직 열두 척의 전선이 있습니다</small></header><div id="view"><div id="badge">3D 항해 미리보기 / 지원 기기에서는 카메라 AR</div><div id="reticle"></div><div id="fleetCount">조선 수군 1 / 12척</div><div id="hanjaCaption"><div class="hanja">今臣戰船 尙有十二</div><div class="hangul">금신전선 상유십이<br>지금 신에게는 아직 열두 척의 전선이 있습니다.</div></div></div><div id="status">3D 모델을 불러오는 중입니다…</div><div id="historyCard" role="status" aria-live="polite"><button id="historyClose" aria-label="해설 닫기">×</button><strong id="historyTitle"></strong><p id="historyText"></p><div class="foot">※ 역사적 배경에 기초한 축약 연출이며 실제 함선별 교전 순서를 재현하지 않습니다.</div></div><div id="panel"><button id="openChrome" style="display:none">🌐 Chrome에서 열기</button><button id="preview" disabled>▶ 제1막 체험하기</button><button id="ar" disabled>📷 카메라 AR 시작</button><button id="place" style="display:none">이 위치에 바다 배치</button><button id="again" disabled>↻ 다시 보기</button><button id="enemyStart" disabled>⚔ 일본군 함선 등장</button><button id="fireStart" disabled>💥 판옥선 포격 시작</button><button id="historyToggle">📜 역사 해설</button><button id="voiceToggle">🔊 내레이션 켜짐</button><button id="soundToggle">💥 대포 소리 켜짐</button><button id="enemyDirection">↻ 적선 방향 180°</button><button id="turn">↻ 배 45° 회전</button><button id="zoomIn">＋ 확대</button><button id="zoomOut">－ 축소</button></div><div class="note">제1막에서는 판옥선 1척에 11척이 합류하는 장면과 한문 음성을 체험합니다. 카메라 AR 시작 후 녹색 원을 기다리지 말고 바다 배치 버튼을 누르세요. 표면이 인식되면 해당 위치에, 인식 전이면 카메라 전방에 배치됩니다. 카메라 AR: Android Chrome의 WebXR AR 지원 기기에서 HTTPS로 실행하세요. 바닥을 천천히 비춰 표면을 찾고 '이 위치에 바다 배치'를 누릅니다. 미지원 기기에서는 3D 미리보기로 체험할 수 있습니다. 일본군 함선은 japanese_warship.glb를 한 번 불러와 3척으로 복제합니다. 역사적 정확성은 별도 검토가 필요합니다. 포격 버튼을 누르면 포연·포탄·물보라·적선 3척의 순차 침몰을 체험합니다. 다시 연출하려면 일본군 함선 등장 버튼을 누르세요.</div><script type="module">
+#enemyStart,#fireStart,#enemyDirection,#historyToggle{display:none!important}#hanjaCaption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:5;text-align:center;pointer-events:none;width:min(92%,780px);padding:12px 20px;background:rgba(7,25,43,.78);border:1px solid rgba(255,255,255,.26);border-radius:12px;color:#fff;opacity:0;transition:opacity .5s ease;text-shadow:0 2px 6px #000}#hanjaCaption.visible{opacity:1}#hanjaCaption .hanja{font-size:clamp(22px,3vw,42px);font-weight:800;letter-spacing:.13em;line-height:1.3}#hanjaCaption .hangul{font-size:clamp(12px,1.2vw,17px);margin-top:5px;color:#e5f1ff}#fleetCount{position:absolute;top:12px;right:12px;z-index:5;background:rgba(7,25,43,.78);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;display:none}</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"}}</script></head><body><header><h2>제1막 · 희망의 열두 척</h2><small>今臣戰船 尙有十二 · 지금 신에게는 아직 열두 척의 전선이 있습니다</small></header><div id="view"><div id="badge">3D 항해 미리보기 / 지원 기기에서는 카메라 AR</div><div id="reticle"></div><div id="fleetCount">조선 수군 1 / 12척</div><div id="hanjaCaption"><div class="hanja">今臣戰船 尙有十二</div><div class="hangul">금신전선 상유십이<br>지금 신에게는 아직 열두 척의 전선이 있습니다.</div></div></div><div id="status">3D 모델을 불러오는 중입니다…</div><div id="historyCard" role="status" aria-live="polite"><button id="historyClose" aria-label="해설 닫기">×</button><strong id="historyTitle"></strong><p id="historyText"></p><div class="foot">※ 역사적 배경에 기초한 축약 연출이며 실제 함선별 교전 순서를 재현하지 않습니다.</div></div><div id="panel"><button id="preview" disabled>▶ 제1막 체험하기</button><button id="act2" disabled>▶ 제2막 체험하기</button><button id="act3" disabled>▶ 제3막 체험하기</button><button id="act4" disabled>▶ 제4막 체험하기</button><button id="act5" disabled>▶ 제5막 체험하기</button><button id="again" disabled style="display:none">↻ 다시 보기</button><button id="ar" disabled style="display:none">AR</button><button id="place" style="display:none">바다 배치</button><button id="openChrome" style="display:none">Chrome</button><button id="enemyStart" disabled style="display:none">적선</button><button id="fireStart" disabled style="display:none">포격</button><button id="historyToggle" style="display:none">해설</button><button id="voiceToggle" style="display:none">내레이션</button><button id="soundToggle" style="display:none">대포</button><button id="enemyDirection" style="display:none">방향</button><button id="turn" style="display:none">회전</button><button id="zoomIn" style="display:none">확대</button><button id="zoomOut" style="display:none">축소</button></div><div class="note">다섯 막은 교육용 재구성입니다. 제1막은 판옥선 12척 집결, 제2막은 결의, 제3막은 결사항전, 제4막은 명량해전, 제5막은 승리와 한자 복습입니다. 한국어 남성 음성이 설치되어 있으면 우선 사용합니다.</div><script type="module">
 import * as THREE from 'three';import {OrbitControls} from 'three/addons/controls/OrbitControls.js';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 const base='https://imm-content.github.io/admiral-yi-history-xr/';const status=document.querySelector('#status'),view=document.querySelector('#view'),preview=document.querySelector('#preview'),ar=document.querySelector('#ar'),place=document.querySelector('#place'),again=document.querySelector('#again'),badge=document.querySelector('#badge');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xc2d6e0);const camera=new THREE.PerspectiveCamera(50,1,.01,100);camera.position.set(0,2.8,6.5);const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.xr.enabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;view.prepend(renderer.domElement);const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,.1,0);orbit.enableDamping=true;orbit.update();scene.add(new THREE.HemisphereLight(0xffffff,0x507187,2.5));const sun=new THREE.DirectionalLight(0xfff6df,2.3);sun.position.set(2,7,4);scene.add(sun);
@@ -172,7 +172,10 @@ let koVoice=null;
 function refreshVoices(){
  if(!ttsSupported)return;
  const voices=window.speechSynthesis.getVoices();
- koVoice=voices.find(v=>v.lang.toLowerCase()==='ko-kr'&&v.localService)||voices.find(v=>v.lang.toLowerCase().startsWith('ko'))||null;
+ const korean=voices.filter(v=>v.lang.toLowerCase().startsWith('ko'));
+ const maleHints=/male|man|남성|남자|injoon|인준|hyun|현우|준우|민준|yong|용|seong|성/i;
+ const femaleHints=/female|woman|여성|여자|yuna|유나|sora|소라|sunhi|선희|heami|혜미/i;
+ koVoice=korean.find(v=>maleHints.test(v.name)&&!femaleHints.test(v.name))||korean.find(v=>!femaleHints.test(v.name))||korean[0]||null;
 }
 if(ttsSupported){refreshVoices();window.speechSynthesis.addEventListener?.('voiceschanged',refreshVoices)}
 else{voiceToggle.disabled=true;voiceToggle.textContent='🔇 내레이션 미지원';showBrowserHelp();}
@@ -279,7 +282,7 @@ function playNextChapter(){
  const token=++chapterSerial;
  const utterance=new SpeechSynthesisUtterance(ch[0]+'. '+ch[1]);
  utterance.lang='ko-KR';if(koVoice)utterance.voice=koVoice;
- utterance.rate=.88;utterance.pitch=1;utterance.volume=1;
+ utterance.rate=.84;utterance.pitch=.65;utterance.volume=1;
  let finished=false;
  const complete=()=>{if(finished)return;finished=true;finishChapter(token)};
  utterance.onend=complete;
@@ -542,7 +545,7 @@ async function loadFleet(){
    setStatus('판옥선 GLB 불러오는 중 · '+loaded.length+' / 12척');
   }
   loaded.forEach((root,i)=>{if(i===0){boatRoot.add(root.children[0]);world.remove(root);boatRoot.position.copy(root.position);ship=boatRoot.children[0]}else{reinforcementShips.push(root);fleetRoots.push(root)}});
-  boatRoot.scale.setScalar(1);boatBaseY=0;ready=true;preview.disabled=false;again.disabled=false;
+  boatRoot.scale.setScalar(1);boatBaseY=0;ready=true;preview.disabled=false;again.disabled=false;[2,3,4,5].forEach(n=>document.querySelector('#act'+n).disabled=false);
   world.visible=true;reset();setStatus('판옥선 12척 로딩 완료. ▶ 제1막 체험하기를 누르세요.');
   console.table(fleetRoots.map((r,i)=>({ship:i+1,x:r.position.x,y:r.position.y,z:r.position.z})));
  }catch(e){console.error(e);setStatus('판옥선 로딩 오류: '+e.message+' · 파일 경로 및 GitHub Pages 배포를 확인하세요.')}
@@ -553,9 +556,9 @@ function speakActOne(){
  try{
   window.speechSynthesis.cancel();
   const reading=new SpeechSynthesisUtterance('금신전선 상유십이');
-  reading.lang='ko-KR';reading.rate=.82;
+  reading.lang='ko-KR';reading.rate=.78;reading.pitch=.65;
   const meaning=new SpeechSynthesisUtterance('지금 신에게는 아직 열두 척의 전선이 있습니다.');
-  meaning.lang='ko-KR';meaning.rate=.9;
+  meaning.lang='ko-KR';meaning.rate=.85;meaning.pitch=.65;
   if(koVoice){reading.voice=koVoice;meaning.voice=koVoice;}
   window.speechSynthesis.speak(reading);
   window.speechSynthesis.speak(meaning);
@@ -564,13 +567,73 @@ function speakActOne(){
 function reset(){
  resetReinforcements();wakeStrength=0;previousWakeZ=null;previousWakeTime=null;wake.visible=false;
  resetEnemies();active=false;userYaw=0;userScale=1;
- boatRoot.position.set(-1.65,boatBaseY,-2.0);
+ reinforcementShips.forEach((r,i)=>{r.position.set(FLEET_COORDS[i+1][0],0,FLEET_COORDS[i+1][1]);r.rotation.set(0,0,0)});
+ boatRoot.position.set(-1.65,boatBaseY,-2.0);boatRoot.rotation.set(0,0,0);
  boatRoot.scale.setScalar(SHIP_SCALE);boatRoot.rotation.set(0,SAIL_HEADING,0);
 }
 function begin(){
- if(!ready)return;world.visible=true;stopNarration();reset();boatRoot.position.set(-1.65,boatBaseY,-2.0);joinFleet();if(!arSession){camera.position.set(0,2.8,6.5);orbit.target.set(0,.1,0);orbit.update();}
+ currentAct=1;updateActHeading(1);clearActEffects();if(!ready)return;world.visible=true;stopNarration();reset();boatRoot.position.set(-1.65,boatBaseY,-2.0);joinFleet();if(!arSession){camera.position.set(0,2.8,6.5);orbit.target.set(0,.1,0);orbit.update();}
  setStatus('판옥선이 한 척씩 나타납니다. 12척이 모이면 한자 독음과 뜻을 읽습니다.');
  badge.textContent='제1막 · 판옥선 12척 집결';
+}
+
+// 제2~5막: 제1막의 바다, 카메라, GLB 로더는 변경하지 않습니다.
+let currentAct=0,actStart=0,actEffectTimer=null;
+const actData={
+ 1:{title:'희망의 열두 척',hanja:'今臣戰船 尙有十二',reading:'금신전선 상유십이',meaning:'지금 신에게는 아직 열두 척의 전선이 있습니다.'},
+ 2:{title:'이순신의 결의',hanja:'出死力 拒戰則猶可爲也',reading:'출사력 거전즉유가위야',meaning:'죽을힘을 다해 막아 싸운다면 아직 해볼 만합니다.'},
+ 3:{title:'필사의 각오',hanja:'必死則生 必生則死',reading:'필사즉생 필생즉사',meaning:'죽기를 각오하면 살고, 살기를 바라면 죽는다.'},
+ 4:{title:'명량의 격전',hanja:'鳴梁海戰',reading:'명량해전',meaning:'거센 물살의 명량에서 조선 수군이 맞서 싸웁니다.'},
+ 5:{title:'승리와 배움',hanja:'以少勝多',reading:'이소승다',meaning:'적은 수로 많은 적을 이기다. 조선 수군의 용기와 지혜를 되새깁니다.'}
+};
+function updateActHeading(n){
+ const d=actData[n];document.querySelector('header h2').textContent='제'+n+'막 · '+d.title;
+ document.querySelector('header small').textContent=d.hanja+' · '+d.meaning;
+ document.querySelector('#hanjaCaption .hanja').textContent=d.hanja;
+ document.querySelector('#hanjaCaption .hangul').textContent=d.reading+' · '+d.meaning;
+ badge.textContent='제'+n+'막 · '+d.title;
+}
+function speakAct(n){
+ if(!ttsSupported)return;
+ refreshVoices();window.speechSynthesis.cancel();
+ const d=actData[n];
+ for(const [i,phrase] of [d.reading,d.meaning].entries()){
+  const u=new SpeechSynthesisUtterance(phrase);u.lang='ko-KR';u.rate=i?.85:.76;u.pitch=.62;
+  if(koVoice)u.voice=koVoice;window.speechSynthesis.speak(u);
+ }
+}
+function clearActEffects(){if(actEffectTimer!==null){clearInterval(actEffectTimer);actEffectTimer=null;}battleEffects.visible=true;clearBattleEffects();}
+function beginOtherAct(n){
+ if(!ready)return;
+ stopNarration();clearActEffects();reset();currentAct=n;actStart=performance.now()/1000;
+ updateActHeading(n);world.visible=true;
+ boatRoot.visible=true;reinforcementShips.forEach(r=>r.visible=true);
+ fleetCount.style.display='block';fleetCount.textContent='조선 수군 12 / 12척';
+ hanjaCaption.classList.add('visible');
+ setStatus('제'+n+'막 · '+actData[n].title+' — 한자와 뜻을 읽습니다.');
+ speakAct(n);
+ // 연출: 제2막은 집결한 선단, 제3막은 진형 전환, 제4막은 물보라와 포연,
+ // 제5막은 승리의 물보라. 모두 기존 바다 메쉬와 카메라를 변경하지 않습니다.
+ if(n===4||n===5){
+  actEffectTimer=setInterval(()=>{
+   if(currentAct!==n)return;
+   const x=(Math.random()-.5)*3.4,z=-1.8+Math.random()*2.8;
+   burst(n===4?'smoke':'splash',new THREE.Vector3(x,.08,z),n===4?5:8);
+   if(n===4&&Math.random()<.6)playCannonSound();
+  },n===4?1450:2200);
+ }
+}
+for(let n=2;n<=5;n++)document.querySelector('#act'+n).onclick=()=>beginOtherAct(n);
+function animateOtherActs(t){
+ if(currentAct<2)return;
+ const e=t-actStart;
+ fleetRoots.forEach((r,i)=>{
+  const x=FLEET_COORDS[i][0],z=FLEET_COORDS[i][1];
+  if(currentAct===2){r.position.x=x;r.position.z=z;r.rotation.y=0;}
+  else if(currentAct===3){r.position.x=x+Math.sin(e*.42+i*.24)*.08;r.position.z=z;r.rotation.y=Math.sin(e*.42)*.09;}
+  else if(currentAct===4){r.position.x=x+Math.sin(e*.7+i*.7)*.055;r.position.z=z+Math.sin(e*.32)*.11;r.rotation.y=Math.sin(e*.38)*.08;}
+  else{r.position.x=x;r.position.z=z;r.rotation.y=0;}
+ });
 }
 preview.onclick=()=>{ensureAudio();if(arSession){if(!placed){setStatus('먼저 이 위치에 바다 배치 버튼을 눌러 주세요.');return;}begin();badge.textContent='AR 항해 다시 시작';return;}world.position.set(0,0,0);world.scale.setScalar(1);begin();badge.textContent='3D 항해 연출 재생 중';};again.onclick=()=>{ensureAudio();if(ready){begin();if(arSession)badge.textContent='판옥선 다시 접근 중'}};document.querySelector('#enemyStart').onclick=()=>{ensureAudio();startEnemies()};document.querySelector('#fireStart').onclick=()=>{ensureAudio();beginSalvo()};document.querySelector('#enemyDirection').onclick=()=>{enemyHeadingOffset=(enemyHeadingOffset+Math.PI)%(2*Math.PI);setStatus('일본군 함선 방향을 180° 변경했습니다.');};document.querySelector('#turn').onclick=()=>{userYaw+=Math.PI/4;setStatus('판옥선 방향을 45도 회전했습니다.')};document.querySelector('#zoomIn').onclick=()=>{userScale=Math.min(2.5,userScale*1.2)};document.querySelector('#zoomOut').onclick=()=>{userScale=Math.max(.4,userScale/1.2)};
 async function checkAR(){if(!navigator.xr||!window.isSecureContext){ar.disabled=true;ar.textContent='AR 미지원 · 3D 사용';showBrowserHelp();return}try{const ok=await navigator.xr.isSessionSupported('immersive-ar');ar.disabled=!ok;ar.textContent=ok?'📷 카메라 AR 시작':'AR 미지원 · 3D 사용';if(!ok)showBrowserHelp()}catch{ar.disabled=true;ar.textContent='AR 미지원 · 3D 사용';showBrowserHelp()}}checkAR();
@@ -599,5 +662,5 @@ renderer.setAnimationLoop((t,frame)=>{const elapsed=t/1000;
  boatRoot.rotation.y=SAIL_HEADING+userYaw;
  boatRoot.rotation.x=0;boatRoot.rotation.z=0;
  boatRoot.position.y=boatBaseY;
- if(arSession&&frame&&!placed&&hitSource){const results=frame.getHitTestResults(hitSource);if(results.length){const pose=results[0].getPose(refSpace);if(pose){hitMatrix.fromArray(pose.transform.matrix);marker.position.setFromMatrixPosition(hitMatrix);marker.quaternion.setFromRotationMatrix(hitMatrix);marker.visible=true;place.dataset.found='1';place.disabled=false;badge.textContent='표면 인식 완료 · 바다 배치 버튼을 누르세요'}}else{marker.visible=false;place.dataset.found='';place.disabled=false}}animateReinforcements(elapsed);animateEnemies(elapsed);animateBattleEffects(elapsed);if(!arSession)orbit.update();renderer.render(scene,camera)});
+ if(arSession&&frame&&!placed&&hitSource){const results=frame.getHitTestResults(hitSource);if(results.length){const pose=results[0].getPose(refSpace);if(pose){hitMatrix.fromArray(pose.transform.matrix);marker.position.setFromMatrixPosition(hitMatrix);marker.quaternion.setFromRotationMatrix(hitMatrix);marker.visible=true;place.dataset.found='1';place.disabled=false;badge.textContent='표면 인식 완료 · 바다 배치 버튼을 누르세요'}}else{marker.visible=false;place.dataset.found='';place.disabled=false}}animateReinforcements(elapsed);animateOtherActs(elapsed);animateEnemies(elapsed);animateBattleEffects(elapsed);if(!arSession)orbit.update();renderer.render(scene,camera)});
 </script></body></html>
