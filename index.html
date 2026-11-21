@@ -1,7 +1,10 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>이순신 한자학습 XR · 다섯 막</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#071725;color:#f7f2e9;font-family:'Malgun Gothic',system-ui,sans-serif}header{text-align:center;padding:24px 12px 12px}h1{margin:0;color:#f4d393;font-size:clamp(25px,5vw,42px)}header p{color:#d5e4e7;margin:8px}.wrap{max-width:1100px;margin:auto;padding:12px}.nav,.toolbar{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:14px 0}button{border:1px solid #b9a77d;background:#183d53;color:white;border-radius:9px;padding:11px 15px;font-size:15px;cursor:pointer}button:hover{background:#2d627c}button.active,.primary{background:#9d7337;color:white}button:disabled{opacity:.5;cursor:wait}.stage{height:min(57vw,540px);min-height:300px;position:relative;overflow:hidden;border:2px solid #8b7755;border-radius:16px;background:#c2d6e0}.stage canvas{display:block}.stage.shake{animation:shake .2s linear 4}@keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(4px,2px)}50%{transform:translate(-4px,-2px)}75%{transform:translate(2px,-3px)}}.stage .badge{position:absolute;top:12px;left:12px;background:#10283bbd;padding:8px 12px;border-radius:7px;font-size:13px;z-index:4}.count{position:absolute;top:12px;right:12px;background:#10283bdc;padding:8px 12px;border-radius:7px;z-index:4;display:none}.admiral{position:absolute;bottom:-3%;right:6%;height:76%;max-width:43%;object-fit:contain;filter:drop-shadow(0 8px 14px #0009);opacity:0;transform:translateX(50px);transition:opacity .9s,transform .9s;z-index:3;pointer-events:none}.admiral.show{opacity:1;transform:none}.strait{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.5s;z-index:2;overflow:hidden}.strait.show{opacity:1}.strait:before,.strait:after{content:"";position:absolute;top:-8%;bottom:-8%;width:40%;background:linear-gradient(100deg,#243128,#60714b 55%,#2e3a2e);box-shadow:0 0 35px #000b;z-index:2;transition:transform 3s}.strait:before{left:-12%;clip-path:polygon(0 0,100% 0,65% 28%,88% 55%,70% 100%,0 100%)}.strait:after{right:-12%;clip-path:polygon(30% 0,100% 0,100% 100%,20% 100%,12% 55%,35% 28%)}.strait.show:before{transform:translateX(7%)}.strait.show:after{transform:translateX(-7%)}.current{position:absolute;inset:0 28%;background:repeating-linear-gradient(168deg,transparent 0 19px,#e1f8ff9c 22px 28px,transparent 31px 52px);background-size:100% 180px;animation:flow 1.15s linear infinite;filter:blur(2px);mix-blend-mode:screen;z-index:1}@keyframes flow{to{background-position:0 180px}}.subtitle{position:absolute;bottom:12px;left:4%;right:4%;background:#041320df;border-radius:10px;padding:12px;text-align:center;font-size:clamp(14px,2vw,20px);font-weight:700;z-index:5;opacity:0;transition:opacity .5s}.subtitle.show{opacity:1}.subtitle .big{display:block;color:#f5d18b;font-family:serif;font-size:clamp(22px,3.7vw,38px);margin-bottom:4px}.subtitle .reading{display:block;font-size:clamp(13px,1.8vw,18px)}.status{min-height:22px;color:#f5d18b;font-size:13px;text-align:center;margin:7px}.lesson{background:#112b3d;border:1px solid #476477;border-radius:14px;padding:20px;text-align:center}.hanja{font-family:serif;font-size:clamp(29px,6vw,55px);color:#f5d18b;margin:8px 0}.readingText{font-size:20px;color:#d5e9f1}.meaning{font-size:19px;margin:10px}.hint{color:#c4d2da;font-size:14px;line-height:1.65}.quiz{margin-top:15px;padding:15px;border:1px solid #466577;border-radius:12px;background:#10283b}.quiz button{margin:4px}.result{color:#f5d18b}footer{text-align:center;color:#9db4c3;font-size:12px;padding:24px}@media(max-width:600px){.stage{min-height:310px}.admiral{height:60%;right:0}.nav button{font-size:13px;padding:9px 10px}}
-</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"}}</script></head><body><header><h1>⚓ 이순신 한자학습 XR</h1><p>열두 척의 기적, 한문으로 만나다 · 체험형 학습관</p></header><main class="wrap"><nav class="nav" id="nav"></nav><section class="stage" id="view"><div class="badge" id="badge">울돌목의 바다 · 3D 학습 체험</div><div class="count" id="count">조선 수군 1 / 12척</div><div class="strait" id="strait"><div class="current"></div></div><img class="admiral" id="admiral" src="assets/admiral.svg" alt="이순신 장군 상징 삽화"><div class="subtitle" id="subtitle" aria-live="polite"></div></section><div class="status" id="status">판옥선 12척을 불러오는 중입니다…</div><div class="toolbar"><button class="primary" id="play" disabled>▶ 제1막 체험 시작</button><button id="speak">🔊 한문·뜻 다시 듣기</button><button id="prev">← 이전 막</button><button id="next">다음 막 →</button></div><section class="lesson"><div class="hint" id="sceneTitle"></div><div class="hanja" id="hanja"></div><div class="readingText" id="reading"></div><div class="meaning" id="meaning"></div><div class="hint" id="explain"></div></section><section class="quiz"><strong>한자 확인 문제</strong><p id="question"></p><div id="choices"></div><p class="result" id="result" aria-live="polite"></p></section></main><footer>역사·한자 교육용 재구성 · 3D 판옥선 및 효과 연출 · 이순신 장군의 실제 음성은 아닙니다.</footer>
+
+/* 제4막: 바다를 가리는 국방색 도형 및 줄무늬 오버레이를 사용하지 않습니다. */
+.stage canvas{width:100%;height:100%}.subtitle,.strait{display:none!important}
+</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"}}</script></head><body><header><h1>⚓ 이순신 한자학습 XR</h1><p>열두 척의 기적, 한문으로 만나다 · 체험형 학습관</p></header><main class="wrap"><nav class="nav" id="nav"></nav><section class="stage" id="view"><div class="badge" id="badge">울돌목의 바다 · 3D 학습 체험</div><div class="count" id="count">조선 수군 1 / 12척</div></section><div class="status" id="status">판옥선 12척을 불러오는 중입니다…</div><div class="toolbar"><button class="primary" id="play" disabled>▶ 제1막 체험 시작</button><button id="speak">🔊 한문·뜻 다시 듣기</button><button id="prev">← 이전 막</button><button id="next">다음 막 →</button></div><section class="lesson"><div class="hint" id="sceneTitle"></div><div class="hanja" id="hanja"></div><div class="readingText" id="reading"></div><div class="meaning" id="meaning"></div><div class="hint" id="explain"></div></section><section class="quiz"><strong>한자 확인 문제</strong><p id="question"></p><div id="choices"></div><p class="result" id="result" aria-live="polite"></p></section></main><footer>역사·한자 교육용 재구성 · 3D 판옥선 및 효과 연출 · 이순신 장군의 실제 음성은 아닙니다. 남성 음성은 브라우저의 설치 음성에 따라 달라집니다.</footer>
 <script type="module">
 import * as THREE from 'three';import {OrbitControls} from 'three/addons/controls/OrbitControls.js';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 const status=document.querySelector('#status'),view=document.querySelector('#view');
@@ -12,9 +15,10 @@ seaTexture.wrapS=THREE.ClampToEdgeWrapping;seaTexture.wrapT=THREE.ClampToEdgeWra
 seaTexture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
 const seaMat=new THREE.MeshStandardMaterial({map:seaTexture,color:0xffffff,metalness:.08,roughness:.78,transparent:true,opacity:.98,side:THREE.DoubleSide});
 seaMat.onBeforeCompile=(shader)=>{
- shader.uniforms.uWaveTime={value:0};seaMat.userData.waveShader=shader;
+ shader.uniforms.uWaveTime={value:0};shader.uniforms.uWaveAmp={value:1};seaMat.userData.waveShader=shader;
  shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>
  uniform float uWaveTime;
+ uniform float uWaveAmp;
  varying vec2 vSeaUV;
  varying float vWaveCrest;`);
  shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
@@ -23,7 +27,7 @@ seaMat.onBeforeCompile=(shader)=>{
  float w2=sin(position.x*-3.4+position.z*8.1-uWaveTime*1.85);
  float w3=sin(position.x*13.7-position.z*10.8+uWaveTime*2.55);
  float w4=sin(position.x*22.5+position.z*17.1-uWaveTime*3.2);
- transformed.y+=.034*w1+.023*w2+.009*w3+.004*w4;
+ transformed.y+=uWaveAmp*(.034*w1+.023*w2+.009*w3+.004*w4);
  vWaveCrest=.43*w1+.30*w2+.18*w3+.09*w4;`);
  shader.vertexShader=shader.vertexShader.replace('#include <beginnormal_vertex>',`#include <beginnormal_vertex>
  float dx=.034*6.3*cos(position.x*6.3+position.z*2.1+uWaveTime*1.45)
@@ -35,6 +39,7 @@ seaMat.onBeforeCompile=(shader)=>{
  objectNormal=normalize(vec3(-dx,1.0,-dz));`);
  shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
  uniform float uWaveTime;
+ uniform float uWaveAmp;
  varying vec2 vSeaUV;
  varying float vWaveCrest;`);
  shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
@@ -56,22 +61,147 @@ const scenes=[
 {title:'제5막 · 명량해전',hanja:'鳴梁海戰',reading:'명량해전',meaning:'명량에서 벌어진 해전',explain:'鳴(울 명) · 梁(들보 량) · 海(바다 해) · 戰(싸울 전). 1597년 명량해전의 역사적 배경을 듣고 학습을 마칩니다.',question:'「海戰」의 뜻은?',choices:['바다에서 벌이는 전투','산에서 벌이는 전투','배를 만드는 일'],answer:0}
 ];
 const coords=[[-1.65,-2],[-.55,-2],[.55,-2],[1.65,-2],[-1.65,-.65],[-.55,-.65],[.55,-.65],[1.65,-.65],[-1.65,.70],[-.55,.70],[.55,.70],[1.65,.70]];
-const ships=[];const loader=new GLTFLoader();let current=0,run=0,ready=false,activeTime=0,act=0,shakeEnd=0,burstNext=0;const bursts=[];let audioCtx=null;
+const ships=Array(12).fill(null);const loader=new GLTFLoader();
+let loadedCount=0, fleetReady=false, act1Spoken=false;
+// 이순신 장군과 일본군 함선은 각기 별도의 GLB 파일을 사용합니다.
+let admiral3D=null, enemyShip=null, enemyLoaded=false;
+const islandGroup=new THREE.Group();world.add(islandGroup);
+function makeIsland(side){
+ const group=new THREE.Group();
+ const geo=new THREE.SphereGeometry(1,22,14);
+ const rock=new THREE.MeshStandardMaterial({color:0x626457,roughness:1});
+ const grass=new THREE.MeshStandardMaterial({color:0x334c30,roughness:1});
+ for(let i=0;i<6;i++){
+  const mound=new THREE.Mesh(geo,i%3===0?rock:grass);
+  mound.position.set(side*(1.90+i*.16),.24+Math.sin(i*1.6)*.13,-3.2+i*.8);
+  mound.scale.set(1.15+i*.14,.65+i*.14,1.0+i*.18);
+  group.add(mound);
+ }
+ islandGroup.add(group);return group;
+}
+makeIsland(-1);makeIsland(1);islandGroup.visible=false;
+const shotGroup=new THREE.Group();world.add(shotGroup);
+const shots=[];
+const cannonGeo=new THREE.SphereGeometry(.045,12,10);
+const cannonMat=new THREE.MeshStandardMaterial({color:0x14191c,roughness:.7});
+function clearShots(){shots.forEach(s=>shotGroup.remove(s.mesh));shots.length=0;}
+function normalizeModel(model,height=.48){
+ model.updateMatrixWorld(true);
+ const b=new THREE.Box3().setFromObject(model),sz=b.getSize(new THREE.Vector3()),center=b.getCenter(new THREE.Vector3());
+ const factor=height/Math.max(sz.x,sz.y,sz.z);
+ model.scale.multiplyScalar(factor);
+ model.position.set(-center.x*factor,-b.min.y*factor,-center.z*factor);
+ return model;
+}
+function loadExtra(urls,onload){
+ const attempt=i=>{if(i>=urls.length)return Promise.reject(Error('모델 경로를 찾을 수 없습니다: '+urls.join(', ')));
+ return new Promise((resolve,reject)=>loader.load(urls[i],g=>resolve(g.scene),undefined,reject)).catch(()=>attempt(i+1))};
+ return attempt(0).then(onload);
+}
+loadExtra(['./assets/admiral-yi-sunsin.glb'],model=>{
+ admiral3D=new THREE.Group();admiral3D.add(normalizeModel(model,.47));
+ admiral3D.visible=false;world.add(admiral3D);
+}).catch(e=>console.warn('이순신 GLB:',e.message));
+loadExtra(['./assets/japanese_warship.glb','./japanese_warship.glb','https://imm-content.github.io/admiral-yi-battle-xr/japanese_warship.glb'],model=>{
+ enemyShip=new THREE.Group();enemyShip.add(normalizeModel(model,.95));enemyShip.visible=false;world.add(enemyShip);enemyLoaded=true;if(act===5){enemyShip.visible=true;enemyShip.position.set(.85,0,-1.3);enemyShip.rotation.set(0,Math.PI,0);}
+}).catch(e=>{console.warn('일본군 GLB:',e.message);});let current=0,run=0,ready=false,activeTime=0,act=0,shakeEnd=0,burstNext=0;const bursts=[];let audioCtx=null;
 function statusMsg(s){status.textContent=s}
 function resetCamera(){camera.position.set(0,2.8,6.5);orbit.target.set(0,.1,0);orbit.update()}
 async function loadShip(i){const url='./assets/panokship'+String(i+1).padStart(2,'0')+'.glb';const model=await new Promise((ok,no)=>loader.load(url,g=>ok(g.scene),undefined,no));model.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());const factor=.68/Math.max(size.x,size.y,size.z);if(!Number.isFinite(factor))throw Error('GLB 크기 오류');model.scale.multiplyScalar(factor);model.position.set(-center.x*factor,-box.min.y*factor-.035,-center.z*factor);const root=new THREE.Group();root.add(model);root.position.set(coords[i][0],0,coords[i][1]);root.visible=false;world.add(root);return root}
-async function loadFleet(){try{for(let start=0;start<12;start+=3){const batch=await Promise.all([0,1,2].map(j=>loadShip(start+j)));ships.push(...batch);statusMsg('판옥선 GLB 로딩 중 · '+ships.length+' / 12척')}ready=true;$('play').disabled=false;statusMsg('판옥선 12척 준비 완료 · 막을 선택하고 체험 시작을 누르세요.')}catch(e){console.error(e);statusMsg('GLB 로딩 오류: '+e.message)}}
-function choose(n){run++;act=0;current=n;window.speechSynthesis?.cancel();ships.forEach(s=>s.visible=false);$('count').style.display='none';$('subtitle').classList.remove('show');$('strait').classList.remove('show');$('admiral').classList.remove('show');$('view').classList.remove('shake');resetCamera();bursts.forEach(b=>world.remove(b));bursts.length=0;const d=scenes[n];$('sceneTitle').textContent=d.title;$('hanja').textContent=d.hanja;$('reading').textContent=d.reading;$('meaning').textContent=d.meaning;$('explain').textContent=d.explain;$('question').textContent=d.question;$('result').textContent='';$('choices').replaceChildren();d.choices.forEach((choice,i)=>{const b=document.createElement('button');b.textContent=choice;b.onclick=()=>$('result').textContent=i===d.answer?'정답입니다!':'다시 생각해 보세요.';$('choices').append(b)});$('nav').replaceChildren();scenes.forEach((x,i)=>{const b=document.createElement('button');b.textContent=(i+1)+'막';if(i===n)b.classList.add('active');b.onclick=()=>choose(i);$('nav').append(b)});$('play').textContent='▶ 제'+(n+1)+'막 체험 시작';$('badge').textContent=d.title;statusMsg(ready?'▶ 체험 시작을 누르세요.':'판옥선 모델을 불러오는 중입니다…')}
-function voice(){const vs=speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('ko'));return vs.find(v=>/male|남성|injoon|준우|현우|민준|영훈|대성/i.test(v.name))||vs[0]||null}
+async function loadFleet(){
+ // 개별 GLB 12개를 병렬 다운로드합니다. 첫 번째 함선이 준비되면 즉시 체험을 시작할 수 있습니다.
+ // 이전 버전의 3척씩 순차 대기하던 구조보다 초기 대기 시간을 줄입니다.
+ const tasks=Array.from({length:12},(_,i)=>loadShip(i).then(root=>{
+  ships[i]=root;loadedCount++;
+  if(i===0){ready=true;$('play').disabled=false;statusMsg('대장선 준비 완료 · 나머지 함선 '+loadedCount+'/12척 로딩 중');}
+  else if(!fleetReady)statusMsg('판옥선 '+loadedCount+'/12척 로딩 완료 · 체험 가능');
+ }).catch(e=>{console.error('판옥선 '+(i+1)+'번 로딩 실패',e);statusMsg('판옥선 '+(i+1)+'번 파일 로딩 실패: '+e.message)}));
+ await Promise.all(tasks);
+ fleetReady=ships.every(Boolean);
+ statusMsg(fleetReady?'판옥선 12척 준비 완료 · 체험 시작을 누르세요.':'일부 함선 로딩 실패 · 파일 경로를 확인하세요.');
+}
+
+function choose(n){run++;act=0;current=n;window.speechSynthesis?.cancel();ships.forEach(s=>{if(s)s.visible=false});if(admiral3D)admiral3D.visible=false;if(enemyShip)enemyShip.visible=false;islandGroup.visible=false;clearShots();$('count').style.display='none';$('view').classList.remove('shake');resetCamera();bursts.forEach(b=>world.remove(b));bursts.length=0;const d=scenes[n];$('sceneTitle').textContent=d.title;$('hanja').textContent=d.hanja;$('reading').textContent=d.reading;$('meaning').textContent=d.meaning;$('explain').textContent=d.explain;$('question').textContent=d.question;$('result').textContent='';$('choices').replaceChildren();d.choices.forEach((choice,i)=>{const b=document.createElement('button');b.textContent=choice;b.onclick=()=>$('result').textContent=i===d.answer?'정답입니다!':'다시 생각해 보세요.';$('choices').append(b)});$('nav').replaceChildren();scenes.forEach((x,i)=>{const b=document.createElement('button');b.textContent=(i+1)+'막';if(i===n)b.classList.add('active');b.onclick=()=>choose(i);$('nav').append(b)});$('play').textContent='▶ 제'+(n+1)+'막 체험 시작';$('badge').textContent=d.title;statusMsg(ready?'▶ 체험 시작을 누르세요.':'대장선 모델을 불러오는 중입니다…')}
+function voice(){const vs=speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('ko'));return vs.find(v=>/male|남성|injoon|준우|현우|민준|영훈|대성|heami/i.test(v.name))||vs[0]||null}
 function speakText(text,rate=.83){if(!('speechSynthesis' in window))return;const u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=rate;u.pitch=.68;const v=voice();if(v)u.voice=v;speechSynthesis.speak(u)}
 function narration(n){speechSynthesis?.cancel();const d=scenes[n];if(n===4){const lines=['명량해전. 1597년 음력 9월, 이순신이 이끄는 조선 수군은 명량해협에서 일본 수군과 맞섰습니다.','조선 수군은 좁은 물길과 빠른 조류, 판옥선의 화포를 활용하여 수적으로 우세한 일본 수군에 맞섰습니다.','전투가 치열하게 이어졌지만 조선 수군은 끝내 적의 진격을 막아냈습니다. 명량해전은 어려운 상황에서도 지휘와 용기로 싸운 역사로 기억됩니다.'];lines.forEach(t=>speakText(t,.82))}else{speakText(d.reading,.77);speakText(d.meaning,.86)}}
-function caption(n){const d=scenes[n];$('subtitle').innerHTML='<span class="big">'+d.hanja+'</span><span class="reading">'+d.reading+'</span><span>'+d.meaning+'</span>';$('subtitle').classList.add('show');narration(n)}
+function caption(n){narration(n)}
 function initAudio(){try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume()}catch(e){console.warn(e)}}
 function boom(){if(!audioCtx)return;const now=audioCtx.currentTime;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(95,now);o.frequency.exponentialRampToValueAtTime(36,now+.45);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.33,now+.015);g.gain.exponentialRampToValueAtTime(.0001,now+.8);o.connect(g).connect(audioCtx.destination);o.start(now);o.stop(now+.81);const length=Math.floor(audioCtx.sampleRate*.65),buffer=audioCtx.createBuffer(1,length,audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<length;i++)data[i]=Math.random()*2-1;const src=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),gain=audioCtx.createGain();src.buffer=buffer;filter.type='lowpass';filter.frequency.value=700;gain.gain.setValueAtTime(.22,now);gain.gain.exponentialRampToValueAtTime(.0001,now+.65);src.connect(filter).connect(gain).connect(audioCtx.destination);src.start(now);src.stop(now+.65)}
 function spray(){const geo=new THREE.SphereGeometry(.035,6,5),mat=new THREE.MeshBasicMaterial({color:0xd7edf1,transparent:true,opacity:.75});for(let i=0;i<10;i++){const m=new THREE.Mesh(geo,mat.clone());m.position.set((Math.random()-.5)*5,.05,Math.random()*3-1.5);world.add(m);bursts.push(m);setTimeout(()=>{world.remove(m);m.geometry.dispose();m.material.dispose();const j=bursts.indexOf(m);if(j>=0)bursts.splice(j,1)},700)}}
-function play(){if(!ready){statusMsg('12척 GLB 로딩이 끝날 때까지 기다려 주세요.');return}run++;window.speechSynthesis?.cancel();act=current+1;activeTime=performance.now()/1000;ships.forEach((s,i)=>{s.visible=act!==4&&act!==5&&(act!==1||i===0);s.position.set(coords[i][0],0,coords[i][1]);s.rotation.set(0,0,0)});$('count').style.display=act===1?'block':'none';$('count').textContent='조선 수군 1 / 12척';$('subtitle').classList.remove('show');$('strait').classList.toggle('show',act===4);$('admiral').classList.remove('show');resetCamera();initAudio();if(act===1){statusMsg('판옥선이 한 척씩 나타납니다.');return}if(act===2||act===3){ships[0].position.set(0,0,-2);$('admiral').classList.add('show');statusMsg('대장선이 선두로 나서고 이순신 장군이 결의를 말합니다.');setTimeout(()=>{if(act===current+1 && (act===2||act===3))caption(current)},1400);return}if(act===4){ships.forEach(s=>s.visible=false);camera.position.set(0,1.35,3.15);orbit.target.set(0,.05,-.3);orbit.update();statusMsg('울돌목의 좁은 해협과 거센 조류');setTimeout(()=>{if(act===4)caption(3)},1800);return}if(act===5){ships.forEach(s=>s.visible=false);$('subtitle').innerHTML='<span class="big">鳴梁海戰 · 명량해전</span>';$('subtitle').classList.add('show');statusMsg('명량해전 · 역사 이야기 내레이션');narration(4);boom();return}}
+function play(){
+ if(!ready){statusMsg('첫 번째 판옥선 로딩 중입니다. 잠시 기다려 주세요.');return}
+ run++;window.speechSynthesis?.cancel();act=current+1;act1Spoken=false;activeTime=performance.now()/1000;
+ ships.forEach((s,i)=>{if(!s)return;s.visible=act===1?i===0:act===2||act===3;s.position.set(coords[i][0],0,coords[i][1]);s.rotation.set(0,0,0)});
+ if(admiral3D)admiral3D.visible=false;
+ if(enemyShip)enemyShip.visible=false;
+ islandGroup.visible=act===4;clearShots();
+ $('count').style.display=act===1?'block':'none';$('count').textContent='조선 수군 1 / 12척';
+ resetCamera();initAudio();sea.scale.y=1;enemySinking=false;enemySinkStart=0;lastFire=0;
+ if(act===1){statusMsg('판옥선이 한 척씩 나타납니다.');return}
+ if(act===2||act===3){
+  // 대장선은 화면 정중앙 선두로 이동하고 장군 GLB는 선수에 서 있습니다.
+  ships[0].position.set(0,0,-1.35);
+  if(admiral3D){admiral3D.position.set(0,.12,-1.05);admiral3D.visible=true;}
+  statusMsg(admiral3D?'대장선 선두 이동 · 이순신 장군의 결의':'장군 GLB를 불러오는 중입니다.');
+  const token=run;setTimeout(()=>{if(token===run)caption(current)},1500);return;
+ }
+ if(act===4){
+  ships.forEach(s=>{if(s)s.visible=false});
+  // 배 없이 실제 3D 바다와 양쪽 섬만 보여줍니다. 도형 오버레이는 사용하지 않습니다.
+  camera.position.set(0,1.5,3.6);orbit.target.set(0,.0,-.7);orbit.update();
+  statusMsg('울돌목의 좁은 해협 · 높아진 파도와 양쪽 섬');
+  const token=run;setTimeout(()=>{if(token===run)caption(3)},1500);return;
+ }
+ if(act===5){
+  ships.forEach(s=>{if(s)s.visible=false});ships[0].visible=true;ships[0].position.set(-.85,0,.55);
+  if(enemyShip){enemyShip.visible=true;enemyShip.position.set(.85,0,-1.3);enemyShip.rotation.set(0,Math.PI,0);}else{statusMsg('일본군 함선 로딩 중 · 완료되면 등장합니다.');}
+  statusMsg(enemyLoaded?'명량해전 · 포격과 일본군 함선 침몰':'명량해전 · 일본군 GLB 로딩 여부 확인 필요');
+  narration(4);return;
+ }
+}
 $('play').onclick=play;$('speak').onclick=()=>{speechSynthesis?.cancel();narration(current)};$('prev').onclick=()=>choose((current+4)%5);$('next').onclick=()=>choose((current+1)%5);
 function resize(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();
-renderer.setAnimationLoop(t=>{const time=t/1000;if(seaMat.userData.waveShader)seaMat.userData.waveShader.uniforms.uWaveTime.value=time;if(act===1){const joined=Math.min(12,1+Math.floor(Math.max(0,time-activeTime)/.85));ships.forEach((s,i)=>s.visible=i<joined);$('count').textContent='조선 수군 '+joined+' / 12척';if(joined===12&&$('subtitle').classList.contains('show')===false){caption(0);statusMsg('판옥선 12척 집결 완료')}}if(act===2||act===3){ships[0].position.z=Math.min(1.45,coords[0][1]+Math.max(0,time-activeTime)*.95)}if(act===5&&time-burstNext>1.8){burstNext=time;boom();spray();$('view').classList.remove('shake');void $('view').offsetWidth;$('view').classList.add('shake')}orbit.update();renderer.render(scene,camera)});
+let lastFire=0,enemySinking=false,enemySinkStart=0;
+function fireCannon(t){
+ if(!enemyShip||!enemyShip.visible||enemySinking)return;
+ const start=ships[0].position.clone().add(new THREE.Vector3(.2,.25,-.12));
+ const end=enemyShip.position.clone().add(new THREE.Vector3(0,.2,0));
+ const mesh=new THREE.Mesh(cannonGeo,cannonMat);mesh.position.copy(start);shotGroup.add(mesh);
+ shots.push({mesh,start,end,born:t,duration:.95});boom();
+ $('view').classList.remove('shake');void $('view').offsetWidth;$('view').classList.add('shake');
+}
+renderer.setAnimationLoop(t=>{
+ const time=t/1000;
+ if(seaMat.userData.waveShader){seaMat.userData.waveShader.uniforms.uWaveTime.value=time;seaMat.userData.waveShader.uniforms.uWaveAmp.value=act===4?4.4:1.0;}
+ if(act===1){
+  const joined=Math.min(12,1+Math.floor(Math.max(0,time-activeTime)/.85));
+  ships.forEach((s,i)=>{if(s)s.visible=i<joined});$('count').textContent='조선 수군 '+ships.slice(0,joined).filter(Boolean).length+' / 12척';
+  if(joined===12&&fleetReady&&!act1Spoken){act1Spoken=true;caption(0);statusMsg('판옥선 12척 집결 완료')}
+ }
+ if(act===2||act===3){
+  ships[0].position.z=Math.min(.35,-1.35+Math.max(0,time-activeTime)*.4);
+  if(admiral3D&&admiral3D.visible&&ships[0])admiral3D.position.z=ships[0].position.z+.28;
+ }
+ if(act===4){
+  const elapsed=Math.min(1,(time-activeTime)/3);
+  islandGroup.children[0].position.x=1.0*elapsed;
+  islandGroup.children[1].position.x=-1.0*elapsed;
+  // 기존 바다의 폭은 유지하고, 4막에서만 파도 높이를 높입니다.
+  if(seaMat.userData.waveShader)seaMat.userData.waveShader.uniforms.uWaveTime.value=time*1.8;
+ }
+ if(act===5){
+  if(enemyShip&&enemyShip.visible&&!enemySinking&&time-activeTime>1.2&&time-lastFire>2.1){lastFire=time;fireCannon(time)}
+  for(let i=shots.length-1;i>=0;i--){const o=shots[i],f=Math.min(1,(time-o.born)/o.duration);
+   o.mesh.position.lerpVectors(o.start,o.end,f);o.mesh.position.y+=Math.sin(Math.PI*f)*.65;
+   if(f>=1){shotGroup.remove(o.mesh);shots.splice(i,1);spray();if(!enemySinking){enemySinking=true;enemySinkStart=time;boom()}}
+  }
+  if(enemySinking&&enemyShip){const f=Math.min(1,(time-enemySinkStart)/5);
+   enemyShip.position.y=-f*.95;enemyShip.rotation.z=f*1.1;
+   if(f>=1){enemyShip.visible=false;statusMsg('일본군 함선 침몰 · 명량해전의 승리');}
+  }
+ }
+ orbit.update();renderer.render(scene,camera)
+});
 choose(0);world.visible=true;loadFleet();
 </script></body></html>
